@@ -13,9 +13,9 @@ const apiMh = Router()
   .use("/games", gamesController)
   .use("/gameplayconfig", gameplayconfigController)
   .use("/users", usersController)
-  .use(userstatsController)
-  .use(linkController)
-  .use(clienttelemetryController);
+  .use("/userstats", userstatsController)
+  .use("/link", linkController)
+  .use("/clienttelemetry", clienttelemetryController);
 
 const apiDirector = Router().use("/android", androidController);
 

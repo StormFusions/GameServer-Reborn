@@ -1,3 +1,4 @@
 {
-  "dataDirectory": "data"
+  "dataDirectory": "data",
+  "initialDonutAmount": 0
 }

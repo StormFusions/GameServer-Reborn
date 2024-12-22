@@ -181,8 +181,6 @@ router.get(
         FROM userData
         WHERE MayhemId = ?`;
 
-    console.log(config.dataDirectory + "/users.db");
-
     try {
       const mayhemId = req.params.mayhemId;
 
@@ -605,10 +603,6 @@ router.put(
           console.error(err);
         });
 
-        // If sql value is empty or null, set it to what it should be based on MayhemId
-        // If the file doesn't exist make it
-        // Override with whatever the req.body is
-
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
         res.send(req.body); // Send the request body back, for some reason. Blame EA.
 
@@ -629,17 +623,13 @@ router.post(
   "/bg_gameserver_plugin/protoland/:landId",
   raw({
     type: "application/x-protobuf",
+    limit: '10mb'
   }) /* Needed so express allows us to read the protobuf body */,
   async (req, res, next) => {
     const QUERY = `
         	SELECT UserAccessToken, WholeLandToken, LandSavePath
         	FROM userData
         	WHERE MayhemId = ?`;
-
-    const UPDATE_QUERY = `
-		UPDATE userData
-		SET LandSavePath = ?
-		WHERE MayhemId = ?`;
     try {
       const landId = req.params.landId;
       const wholeLandToken = req.headers["land-update-token"];
@@ -752,13 +742,20 @@ router.post(
   },
 );
 
+// -- Donuts -- \\
+
 router.get(
   "/bg_gameserver_plugin/protocurrency/:landId",
   async (req, res, next) => {
     const QUERY = `
-        	SELECT UserAccessToken, WholeLandToken
+        	SELECT UserAccessToken, WholeLandToken, CurrencySavePath
         	FROM userData
         	WHERE MayhemId = ?`;
+    const UPDATE_QUERY = `
+		UPDATE userData
+		SET CurrencySavePath = ?
+		WHERE MayhemId = ?`;
+
 
     try {
       const landId = req.params.landId;
@@ -822,14 +819,36 @@ router.get(
         const root = await protobuf.load("TappedOut.proto");
         const CurrencyData = root.lookupType("Data.CurrencyData");
 
-        let message = CurrencyData.create({
-          id: landId,
-          vcTotalPurchased: "0",
-          vcTotalAwarded: "0",
-          vcBalance: "0",
-        });
+	let savePath = userData.CurrencySavePath;
+	if (!savePath || savePath == "") {
+		savePath = config.dataDirectory + `/${landId}/${landId}.currency`;
+		db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
+            	if (error) {
+              		console.error("Error updating CurrencySavePath:", error.message);
+              		res
+				.type("application/xml")
+				.status(500)
+				.send(`<?xml version="1.0" encoding="UTF-8"?>
+							<error code="500" type="INTERNAL_SERVER_ERROR"/>`);
+			return;
+		}
+          });
+	}
+
+	if (!fs.existsSync(savePath) || fs.statSync(savePath).size == 0) {
+		let message = CurrencyData.create({
+          		id: landId,
+          		vcTotalPurchased: 0,
+          		vcTotalAwarded: config.initialDonutAmount,
+          		vcBalance: config.initialDonutAmount,
+			createdAt: 1715911362,
+			updatedAt: Date.now()
+        	});
+		await fs.writeFileSync(savePath, CurrencyData.encode(message).finish());
+	}
+
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-        res.send(CurrencyData.encode(message).finish());
+        res.send( await fs.readFileSync(savePath) );
 
         db.close((error) => {
           if (error) {
@@ -846,20 +865,182 @@ router.get(
 
 router.post(
   "/bg_gameserver_plugin/extraLandUpdate/:landId/protoland/",
+  raw({
+    type: "application/x-protobuf"
+  }) /* Needed so express allows us to read the protobuf body */,
   async (req, res, next) => {
+    const QUERY = `
+        	SELECT UserAccessToken, WholeLandToken, CurrencySavePath
+        	FROM userData
+        	WHERE MayhemId = ?`;
+
+    const landId = req.params.landId;
+    const wholeLandToken = req.headers["land-update-token"];
+
     try {
-      res.type("application/x-protobuf").status(200).send(""); // Ignore for now as i don't know what it's for
+      const reqToken =
+        req.headers["nucleus_token"] || req.headers["mh_auth_params"];
+      if (!reqToken) {
+        res
+          .type("application/xml")
+          .status(400)
+          .send(
+            `<?xml version="1.0" encoding="UTF-8"?>
+				<error code="400" type="MISSING_VALUE" field="nucleus_token"/>`,
+          );
+        return;
+      }
+
+      const db = new sqlite3.Database(
+        config.dataDirectory + "/users.db",
+        sqlite3.OPEN_READONLY,
+        (error) => {
+          if (error) {
+            console.error("Error opening database:", error.message);
+            return;
+          }
+        },
+      );
+
+      await db.get(QUERY, [landId], async (error, row) => {
+        if (error) {
+          console.error("Error executing query:", error.message);
+          db.close();
+          return;
+        }
+
+        if (!row) {
+          res
+            .type("application/xml")
+            .status(404)
+            .send(
+              `<?xml version="1.0" encoding="UTF-8"?>
+					<error code="404" type="NOT_FOUND" field="mayhemId"/>`,
+            );
+          return;
+        }
+
+        let userData = row;
+
+        if (!reqToken == userData.UserAccessToken) {
+          res
+            .type("application/xml")
+            .status(400)
+            .send(
+              `<?xml version="1.0" encoding="UTF-8"?>
+					<error code="400" type="BAD_REQUEST" field="Invalid AcessToken for specified MayhemId"/>`,
+            );
+          return;
+        }
+
+        if (!wholeLandToken == userData.WholeLandToken) {
+          res
+            .type("application/xml")
+            .status(400)
+            .send(
+              `<?xml version="1.0" encoding="UTF-8"?>
+					<error code="400" type="BAD_REQUEST" field="Invalid WholeLandToken for specified MayhemId"/>`,
+            );
+          return;
+        }	
+
+	const root = await protobuf.load("TappedOut.proto");
+
+        const ExtraLandMessage  = root.lookupType("Data.ExtraLandMessage");
+	const ExtraLandResponse = root.lookupType("Data.ExtraLandResponse");
+
+	const CurrencyDelta     = root.lookupType("Data.CurrencyDelta");
+	const CurrencyData	= root.lookupType("Data.CurrencyData");
+
+	let savePath = userData.CurrencySavePath;
+	if (!savePath || savePath == "") {
+		savePath = config.dataDirectory + `/${landId}/${landId}.currency`;
+		db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
+            	if (error) {
+              		console.error("Error updating CurrencySavePath:", error.message);
+              		res
+				.type("application/xml")
+				.status(500)
+				.send(`<?xml version="1.0" encoding="UTF-8"?>
+							<error code="500" type="INTERNAL_SERVER_ERROR"/>`);
+			return;
+		}
+          });
+	}
+
+	if (!fs.existsSync(savePath) || fs.statSync(savePath).size == 0) {
+		let message = CurrencyData.create({
+          		id: landId,
+          		vcTotalPurchased: 0,
+          		vcTotalAwarded: config.initialDonutAmount,
+          		vcBalance: config.initialDonutAmount,
+			createdAt: 1715911362,
+			updatedAt: Date.now()
+        	});
+		fs.writeFileSync(savePath, CurrencyData.encode(message).finish());
+	}
+	
+
+	const decodedMessage = ExtraLandMessage.decode(req.body);
+
+	const currencyFile = fs.readFileSync(userData.CurrencySavePath);
+	const decodedCurrencyData = CurrencyData.decode(currencyFile);
+	
+	let donutDelta = 0;
+	let processedCurrencyDelta = [];
+	decodedMessage.currencyDelta.forEach(function(currencyDelta) {
+		donutDelta += currencyDelta.amount;
+
+		processedCurrencyDelta.push(
+			CurrencyDelta.create({
+				id: currencyDelta.id
+			})
+		);
+	});
+
+	const newTotal = (Number(decodedCurrencyData.vcTotalAwarded) + donutDelta);
+	let newContent = CurrencyData.create({
+		id: decodedCurrencyData.id,
+		vcTotalPurchased: Number(decodedCurrencyData.vcTotalPurchased),
+		vcTotalAwarded: newTotal,
+		vcBalance: newTotal,
+		createdAt: 1715911362,
+		updatedAt: Date.now()
+	});
+
+	fs.writeFileSync(userData.CurrencySavePath, CurrencyData.encode(newContent).finish());
+
+	
+	let message = ExtraLandResponse.create({
+		processedCurrencyDelta: processedCurrencyDelta,
+		processedEvent: [],
+		receivedEvent: [],
+		communityGoal: []
+	});
+	
+        res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
+	res.send( ExtraLandResponse.encode(message).finish() );
+
+        db.close((error) => {
+          if (error) {
+            console.error("Error closing database:", error.message);
+            return;
+          }
+        });
+      });
     } catch (error) {
       next(error);
     }
   },
 );
 
+// -- Not Sure -- \\
+
 router.get(
-  "/bg_gameserver_plugin/protoland/:landId",
+  "/bg_gameserver_plugin/event/:notsure/protoland/", // Not sure what the client wants to happen
   async (req, res, next) => {
     try {
-      res.status(200);
+        res.type("application/x-protobuf").status(200).send("");
     } catch (error) {
       next(error);
     }
@@ -868,7 +1049,7 @@ router.get(
 
 // -- Friends -- \\
 
-router.post(
+router.get(
   "/bg_gameserver_plugin/friendData/:something",
   async (req, res, next) => {
     try {
