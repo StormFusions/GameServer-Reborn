@@ -623,7 +623,7 @@ router.post(
   "/bg_gameserver_plugin/protoland/:landId",
   raw({
     type: "application/x-protobuf",
-    limit: '10mb'
+    limit: "10mb",
   }) /* Needed so express allows us to read the protobuf body */,
   async (req, res, next) => {
     const QUERY = `
@@ -756,7 +756,6 @@ router.get(
 		SET CurrencySavePath = ?
 		WHERE MayhemId = ?`;
 
-
     try {
       const landId = req.params.landId;
       const wholeLandToken = req.headers["land-update-token"];
@@ -819,36 +818,37 @@ router.get(
         const root = await protobuf.load("TappedOut.proto");
         const CurrencyData = root.lookupType("Data.CurrencyData");
 
-	let savePath = userData.CurrencySavePath;
-	if (!savePath || savePath == "") {
-		savePath = config.dataDirectory + `/${landId}/${landId}.currency`;
-		db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
-            	if (error) {
-              		console.error("Error updating CurrencySavePath:", error.message);
-              		res
-				.type("application/xml")
-				.status(500)
-				.send(`<?xml version="1.0" encoding="UTF-8"?>
+        let savePath = userData.CurrencySavePath;
+        if (!savePath || savePath == "") {
+          savePath = config.dataDirectory + `/${landId}/${landId}.currency`;
+          db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
+            if (error) {
+              console.error("Error updating CurrencySavePath:", error.message);
+              res.type("application/xml").status(500)
+                .send(`<?xml version="1.0" encoding="UTF-8"?>
 							<error code="500" type="INTERNAL_SERVER_ERROR"/>`);
-			return;
-		}
+              return;
+            }
           });
-	}
+        }
 
-	if (!fs.existsSync(savePath) || fs.statSync(savePath).size == 0) {
-		let message = CurrencyData.create({
-          		id: landId,
-          		vcTotalPurchased: 0,
-          		vcTotalAwarded: config.initialDonutAmount,
-          		vcBalance: config.initialDonutAmount,
-			createdAt: 1715911362,
-			updatedAt: Date.now()
-        	});
-		await fs.writeFileSync(savePath, CurrencyData.encode(message).finish());
-	}
+        if (!fs.existsSync(savePath) || fs.statSync(savePath).size == 0) {
+          let message = CurrencyData.create({
+            id: landId,
+            vcTotalPurchased: 0,
+            vcTotalAwarded: config.initialDonutAmount,
+            vcBalance: config.initialDonutAmount,
+            createdAt: 1715911362,
+            updatedAt: Date.now(),
+          });
+          await fs.writeFileSync(
+            savePath,
+            CurrencyData.encode(message).finish(),
+          );
+        }
 
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-        res.send( await fs.readFileSync(savePath) );
+        res.send(await fs.readFileSync(savePath));
 
         db.close((error) => {
           if (error) {
@@ -866,7 +866,7 @@ router.get(
 router.post(
   "/bg_gameserver_plugin/extraLandUpdate/:landId/protoland/",
   raw({
-    type: "application/x-protobuf"
+    type: "application/x-protobuf",
   }) /* Needed so express allows us to read the protobuf body */,
   async (req, res, next) => {
     const QUERY = `
@@ -942,84 +942,84 @@ router.post(
 					<error code="400" type="BAD_REQUEST" field="Invalid WholeLandToken for specified MayhemId"/>`,
             );
           return;
-        }	
+        }
 
-	const root = await protobuf.load("TappedOut.proto");
+        const root = await protobuf.load("TappedOut.proto");
 
-        const ExtraLandMessage  = root.lookupType("Data.ExtraLandMessage");
-	const ExtraLandResponse = root.lookupType("Data.ExtraLandResponse");
+        const ExtraLandMessage = root.lookupType("Data.ExtraLandMessage");
+        const ExtraLandResponse = root.lookupType("Data.ExtraLandResponse");
 
-	const CurrencyDelta     = root.lookupType("Data.CurrencyDelta");
-	const CurrencyData	= root.lookupType("Data.CurrencyData");
+        const CurrencyDelta = root.lookupType("Data.CurrencyDelta");
+        const CurrencyData = root.lookupType("Data.CurrencyData");
 
-	let savePath = userData.CurrencySavePath;
-	if (!savePath || savePath == "") {
-		savePath = config.dataDirectory + `/${landId}/${landId}.currency`;
-		db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
-            	if (error) {
-              		console.error("Error updating CurrencySavePath:", error.message);
-              		res
-				.type("application/xml")
-				.status(500)
-				.send(`<?xml version="1.0" encoding="UTF-8"?>
+        let savePath = userData.CurrencySavePath;
+        if (!savePath || savePath == "") {
+          savePath = config.dataDirectory + `/${landId}/${landId}.currency`;
+          db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
+            if (error) {
+              console.error("Error updating CurrencySavePath:", error.message);
+              res.type("application/xml").status(500)
+                .send(`<?xml version="1.0" encoding="UTF-8"?>
 							<error code="500" type="INTERNAL_SERVER_ERROR"/>`);
-			return;
-		}
+              return;
+            }
           });
-	}
+        }
 
-	if (!fs.existsSync(savePath) || fs.statSync(savePath).size == 0) {
-		let message = CurrencyData.create({
-          		id: landId,
-          		vcTotalPurchased: 0,
-          		vcTotalAwarded: config.initialDonutAmount,
-          		vcBalance: config.initialDonutAmount,
-			createdAt: 1715911362,
-			updatedAt: Date.now()
-        	});
-		fs.writeFileSync(savePath, CurrencyData.encode(message).finish());
-	}
-	
+        if (!fs.existsSync(savePath) || fs.statSync(savePath).size == 0) {
+          let message = CurrencyData.create({
+            id: landId,
+            vcTotalPurchased: 0,
+            vcTotalAwarded: config.initialDonutAmount,
+            vcBalance: config.initialDonutAmount,
+            createdAt: 1715911362,
+            updatedAt: Date.now(),
+          });
+          fs.writeFileSync(savePath, CurrencyData.encode(message).finish());
+        }
 
-	const decodedMessage = ExtraLandMessage.decode(req.body);
+        const decodedMessage = ExtraLandMessage.decode(req.body);
 
-	const currencyFile = fs.readFileSync(userData.CurrencySavePath);
-	const decodedCurrencyData = CurrencyData.decode(currencyFile);
-	
-	let donutDelta = 0;
-	let processedCurrencyDelta = [];
-	decodedMessage.currencyDelta.forEach(function(currencyDelta) {
-		donutDelta += currencyDelta.amount;
+        const currencyFile = fs.readFileSync(userData.CurrencySavePath);
+        const decodedCurrencyData = CurrencyData.decode(currencyFile);
 
-		processedCurrencyDelta.push(
-			CurrencyDelta.create({
-				id: currencyDelta.id
-			})
-		);
-	});
+        let donutDelta = 0;
+        let processedCurrencyDelta = [];
+        decodedMessage.currencyDelta.forEach(function (currencyDelta) {
+          donutDelta += currencyDelta.amount;
 
-	const newTotal = (Number(decodedCurrencyData.vcTotalAwarded) + donutDelta);
-	let newContent = CurrencyData.create({
-		id: decodedCurrencyData.id,
-		vcTotalPurchased: Number(decodedCurrencyData.vcTotalPurchased),
-		vcTotalAwarded: newTotal,
-		vcBalance: newTotal,
-		createdAt: 1715911362,
-		updatedAt: Date.now()
-	});
+          processedCurrencyDelta.push(
+            CurrencyDelta.create({
+              id: currencyDelta.id,
+            }),
+          );
+        });
 
-	fs.writeFileSync(userData.CurrencySavePath, CurrencyData.encode(newContent).finish());
+        const newTotal =
+          Number(decodedCurrencyData.vcTotalAwarded) + donutDelta;
+        let newContent = CurrencyData.create({
+          id: decodedCurrencyData.id,
+          vcTotalPurchased: Number(decodedCurrencyData.vcTotalPurchased),
+          vcTotalAwarded: newTotal,
+          vcBalance: newTotal,
+          createdAt: 1715911362,
+          updatedAt: Date.now(),
+        });
 
-	
-	let message = ExtraLandResponse.create({
-		processedCurrencyDelta: processedCurrencyDelta,
-		processedEvent: [],
-		receivedEvent: [],
-		communityGoal: []
-	});
-	
+        fs.writeFileSync(
+          userData.CurrencySavePath,
+          CurrencyData.encode(newContent).finish(),
+        );
+
+        let message = ExtraLandResponse.create({
+          processedCurrencyDelta: processedCurrencyDelta,
+          processedEvent: [],
+          receivedEvent: [],
+          communityGoal: [],
+        });
+
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-	res.send( ExtraLandResponse.encode(message).finish() );
+        res.send(ExtraLandResponse.encode(message).finish());
 
         db.close((error) => {
           if (error) {
@@ -1040,7 +1040,7 @@ router.get(
   "/bg_gameserver_plugin/event/:notsure/protoland/", // Not sure what the client wants to happen
   async (req, res, next) => {
     try {
-        res.type("application/x-protobuf").status(200).send("");
+      res.type("application/x-protobuf").status(200).send("");
     } catch (error) {
       next(error);
     }
