@@ -1061,21 +1061,33 @@ router.get(
 );
 
 // -- Tracking -- \\
-// Ignored, but the game won't function without it \\
+// Mostly, but the game won't function without it \\
 
-router.post("/bg_gameserver_plugin/trackinglog", async (req, res, next) => {
-  try {
-    const xmlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+router.post(
+  "/bg_gameserver_plugin/trackinglog", // Error messages from the client
+  raw({
+    type: "application/x-protobuf",
+  }) /* Needed so express allows us to read the protobuf body */,
+  async (req, res, next) => {
+    try {
+      const root = await protobuf.load("TappedOut.proto");
+      const ClientLogMessage = root.lookupType("Data.ClientLogMessage");
+
+      const decodedMessage = ClientLogMessage.decode(req.body);
+      console.log(decodedMessage);
+
+      const xmlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 		<Resources>
   			<URI>OK</URI>
 		</Resources>`;
 
-    res.type("application/xml"); // Make sure the client knows it's XML
-    res.send(xmlResponse); // Ignore the request, but let the client know we received it
-  } catch (error) {
-    next(error);
-  }
-});
+      res.type("application/xml"); // Make sure the client knows it's XML
+      res.send(xmlResponse); // Ignore the request, but let the client know we received it
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 router.post("/bg_gameserver_plugin/trackingmetrics", async (req, res, next) => {
   try {

@@ -1184,3 +1184,34 @@ message KinesisLandUpdateMessage {
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////// //
+
+message ClientLogMessage {
+    required int64 time_stamp = 1;
+
+    required Severity severity = 2;
+    enum Severity {
+        WARN = 0;
+        SEVERE = 1;
+    }
+
+    required string source = 3;
+    required string text = 4;
+    optional string userId = 5;
+
+    optional ConnectionType connectionType = 6;
+    enum ConnectionType {
+        WIFI = 0;
+        MOBILE = 1;
+        UNKNOWN = 2;
+    }
+
+    optional ServerProvidedLogFields serverLogFields = 7;
+    message ServerProvidedLogFields {
+        optional int64 server_received_timestamp = 1;
+        optional string server_received_datestamp = 2;
+        optional string server_received_country_code = 3;
+        optional string server_received_clientSessionGUID = 4;
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////// //
