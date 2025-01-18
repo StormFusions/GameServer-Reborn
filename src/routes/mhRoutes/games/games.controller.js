@@ -8,6 +8,18 @@ import { v4 as uuidv4 } from "uuid";
 
 import config from "../../../../config.json" with { type: "json" };
 
+const db = new sqlite3.Database(
+        config.dataDirectory + "/users.db",
+        sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+        (error) => {
+          if (error) {
+            console.error("Error opening database:", error.message);
+            return;
+          }
+        },
+);
+
+
 const router = Router();
 
 router.get("/lobby/time", async (req, res, next) => {
@@ -51,11 +63,11 @@ router.post(
   async (req, res, next) => {
     const QUERY = `
         SELECT UserAccessToken, WholeLandToken
-        FROM userData
+        FROM UserData
         WHERE MayhemId = ?`;
 
     const UPDATE_QUERY = `
-        UPDATE userData
+        UPDATE UserData
         SET WholeLandToken = ?
         WHERE MayhemId = ?`;
 
@@ -76,21 +88,9 @@ router.post(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READWRITE,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [mayhemId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -159,13 +159,6 @@ router.post(
             res.send(WholeLandTokenResponse.encode(message).finish());
           },
         );
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -178,7 +171,7 @@ router.get(
   async (req, res, next) => {
     const QUERY = `
         SELECT UserAccessToken, WholeLandToken
-        FROM userData
+        FROM UserData
         WHERE MayhemId = ?`;
 
     try {
@@ -197,21 +190,9 @@ router.get(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READWRITE,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [mayhemId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -250,13 +231,6 @@ router.get(
         });
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
         res.send(WholeLandTokenResponse.encode(message).finish());
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -272,11 +246,11 @@ router.post(
   async (req, res, next) => {
     const QUERY = `
         SELECT UserAccessToken, WholeLandToken
-        FROM userData
+        FROM UserData
         WHERE MayhemId = ?`;
 
     const UPDATE_QUERY = `
-        UPDATE userData
+        UPDATE UserData
         SET WholeLandToken = ?
         WHERE MayhemId = ?`;
 
@@ -301,21 +275,9 @@ router.post(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READWRITE,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [mayhemId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -378,13 +340,6 @@ router.post(
           res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
           res.send(DeleteTokenResponse.encode(message).finish());
         });
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -397,7 +352,7 @@ router.get(
   async (req, res, next) => {
     const QUERY = `
         	SELECT UserAccessToken, WholeLandToken, LandSavePath
-        	FROM userData
+        	FROM UserData
         	WHERE MayhemId = ?`;
 
     try {
@@ -417,21 +372,9 @@ router.get(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READONLY,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [landId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -480,13 +423,6 @@ router.get(
 
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
         res.send(serializedSaveData);
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -502,11 +438,11 @@ router.put(
   async (req, res, next) => {
     const QUERY = `
         	SELECT UserAccessToken, WholeLandToken, LandSavePath
-        	FROM userData
+        	FROM UserData
         	WHERE MayhemId = ?`;
 
     const UPDATE_QUERY = `
-		UPDATE userData
+		UPDATE UserData
 		SET LandSavePath = ?
 		WHERE MayhemId = ?`;
     try {
@@ -526,21 +462,9 @@ router.put(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READONLY,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [landId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -598,6 +522,8 @@ router.put(
           });
         }
 
+	fs.mkdirSync(config.dataDirectory + "/"  + landId);
+
         // Override file with req.body
         fs.writeFileSync(savePath, req.body, { flag: "w+" }, (err) => {
           console.error(err);
@@ -605,13 +531,6 @@ router.put(
 
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
         res.send(req.body); // Send the request body back, for some reason. Blame EA.
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -628,7 +547,7 @@ router.post(
   async (req, res, next) => {
     const QUERY = `
         	SELECT UserAccessToken, WholeLandToken, LandSavePath
-        	FROM userData
+        	FROM UserData
         	WHERE MayhemId = ?`;
     try {
       const landId = req.params.landId;
@@ -647,21 +566,9 @@ router.post(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READONLY,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [landId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -728,13 +635,6 @@ router.post(
           `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 				<WholeLandUpdateResponse/>`,
         );
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -749,10 +649,10 @@ router.get(
   async (req, res, next) => {
     const QUERY = `
         	SELECT UserAccessToken, WholeLandToken, CurrencySavePath
-        	FROM userData
+        	FROM UserData
         	WHERE MayhemId = ?`;
     const UPDATE_QUERY = `
-		UPDATE userData
+		UPDATE UserData
 		SET CurrencySavePath = ?
 		WHERE MayhemId = ?`;
 
@@ -773,21 +673,9 @@ router.get(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READONLY,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [landId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -849,13 +737,6 @@ router.get(
 
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
         res.send(await fs.readFileSync(savePath));
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -871,7 +752,7 @@ router.post(
   async (req, res, next) => {
     const QUERY = `
         	SELECT UserAccessToken, WholeLandToken, CurrencySavePath
-        	FROM userData
+        	FROM UserData
         	WHERE MayhemId = ?`;
 
     const landId = req.params.landId;
@@ -891,21 +772,9 @@ router.post(
         return;
       }
 
-      const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READONLY,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
-      );
-
       await db.get(QUERY, [landId], async (error, row) => {
         if (error) {
           console.error("Error executing query:", error.message);
-          db.close();
           return;
         }
 
@@ -970,8 +839,8 @@ router.post(
           let message = CurrencyData.create({
             id: landId,
             vcTotalPurchased: 0,
-            vcTotalAwarded: config.initialDonutAmount,
-            vcBalance: config.initialDonutAmount,
+            vcTotalAwarded: config.startingDonuts,
+            vcBalance: config.startingDonuts,
             createdAt: 1715911362,
             updatedAt: Date.now(),
           });
@@ -1002,7 +871,7 @@ router.post(
           vcTotalPurchased: Number(decodedCurrencyData.vcTotalPurchased),
           vcTotalAwarded: newTotal,
           vcBalance: newTotal,
-          createdAt: 1715911362,
+          createdAt: 1715911362, // Random date 
           updatedAt: Date.now(),
         });
 
@@ -1020,13 +889,6 @@ router.post(
 
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
         res.send(ExtraLandResponse.encode(message).finish());
-
-        db.close((error) => {
-          if (error) {
-            console.error("Error closing database:", error.message);
-            return;
-          }
-        });
       });
     } catch (error) {
       next(error);
@@ -1061,7 +923,7 @@ router.get(
 );
 
 // -- Tracking -- \\
-// Mostly, but the game won't function without it \\
+// Mostly ignored, but the game won't function without it \\
 
 router.post(
   "/bg_gameserver_plugin/trackinglog", // Error messages from the client

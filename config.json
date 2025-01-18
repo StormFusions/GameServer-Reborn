@@ -1,4 +1,7 @@
 {
+  "listenPort": 4242,
   "dataDirectory": "data",
-  "initialDonutAmount": 0
+  "startingDonuts": 0,
+  "startingUID": 1000000000000,
+  "startingMID": 3042000000000000
 }

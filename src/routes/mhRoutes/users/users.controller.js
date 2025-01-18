@@ -6,11 +6,22 @@ import sqlite3 from "sqlite3";
 
 import config from "../../../../config.json" with { type: "json" };
 
+const db = new sqlite3.Database(
+      config.dataDirectory + "/users.db",
+      sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+      (error) => {
+        if (error) {
+          console.error("[users.controller.js] Error opening database:", error.message);
+          return;
+        }
+      },
+);
+
 const router = Router();
 
 const QUERY = `
         SELECT MayhemId, UserAccessToken, SessionId, SessionKey
-        FROM userData
+        FROM UserData
         WHERE UserId = ?`;
 
 router.put("/", async (req, res, next) => {
@@ -30,25 +41,7 @@ router.put("/", async (req, res, next) => {
       return;
     }
 
-    const mh_uid = req.headers["mh_uid"];
-
-    const db = new sqlite3.Database(
-      config.dataDirectory + "/users.db",
-      sqlite3.OPEN_READONLY,
-      (error) => {
-        if (error) {
-          console.error("Error opening database:", error.message);
-          res
-            .type("application/xml")
-            .status(500)
-            .send(
-              `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="500" type="INTERNAL_SERVER_ERROR"/>`,
-            );
-          return;
-        }
-      },
-    );
+    const mh_uid = req.headers["mh_uid"]; 
 
     await db.get(QUERY, [applicationUserId], async (error, row) => {
       if (error) {
@@ -60,7 +53,6 @@ router.put("/", async (req, res, next) => {
             `<?xml version="1.0" encoding="UTF-8"?>
 					<error code="500" type="INTERNAL_SERVER_ERROR"/>`,
           );
-        db.close();
         return;
       }
 
@@ -92,7 +84,7 @@ router.put("/", async (req, res, next) => {
       const UsersResponseMessage = root.lookupType("Data.UsersResponseMessage");
 
       const MayhemId = userData.MayhemId.toString();
-      const SessionKey = userData.SessionKey.toString();
+      const SessionKey = ""; // userData.SessionKey.toString();
 
       let message = UsersResponseMessage.create({
         user: {
@@ -104,13 +96,6 @@ router.put("/", async (req, res, next) => {
 
       res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
       res.send(UsersResponseMessage.encode(message).finish());
-
-      db.close((error) => {
-        if (error) {
-          console.error("Error closing database:", error.message);
-          return;
-        }
-      });
     });
   } catch (error) {
     next(error);
