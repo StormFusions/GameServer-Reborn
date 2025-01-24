@@ -9,16 +9,15 @@ import { v4 as uuidv4 } from "uuid";
 import config from "../../../../config.json" with { type: "json" };
 
 const db = new sqlite3.Database(
-        config.dataDirectory + "/users.db",
-        sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-        (error) => {
-          if (error) {
-            console.error("Error opening database:", error.message);
-            return;
-          }
-        },
+  config.dataDirectory + "/users.db",
+  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+  (error) => {
+    if (error) {
+      console.error("Error opening database:", error.message);
+      return;
+    }
+  },
 );
-
 
 const router = Router();
 
@@ -522,7 +521,7 @@ router.put(
           });
         }
 
-	fs.mkdirSync(config.dataDirectory + "/"  + landId);
+        fs.mkdirSync(config.dataDirectory + "/" + landId);
 
         // Override file with req.body
         fs.writeFileSync(savePath, req.body, { flag: "w+" }, (err) => {
@@ -871,7 +870,7 @@ router.post(
           vcTotalPurchased: Number(decodedCurrencyData.vcTotalPurchased),
           vcTotalAwarded: newTotal,
           vcBalance: newTotal,
-          createdAt: 1715911362, // Random date 
+          createdAt: 1715911362, // Random date
           updatedAt: Date.now(),
         });
 
@@ -912,15 +911,23 @@ router.get(
 // -- Friends -- \\
 
 router.get(
-  "/bg_gameserver_plugin/friendData/:something",
+  "/bg_gameserver_plugin/friendData/origin",
   async (req, res, next) => {
     try {
-      res.status(200).send("Not yet implemented"); // Not yet implemented, but let the client know we received it
+      res.status(200).send(""); // Not yet implemented, but let the client know we received it
     } catch (error) {
       next(error);
     }
   },
 );
+
+router.post("/bg_gameserver_plugin/friendData", async (req, res, next) => {
+  try {
+    res.status(200).send(""); // Not yet implemented, but let the client know we received it
+  } catch (error) {
+    next(error);
+  }
+});
 
 // -- Tracking -- \\
 // Mostly ignored, but the game won't function without it \\

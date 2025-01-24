@@ -22,18 +22,20 @@ const apiMh = Router()
   .use("/link", linkController)
   .use("/clienttelemetry", clienttelemetryController);
 
-const apiDirector = Router()
-  .use("/android", androidController);
+const apiDirector = Router().use("/android", androidController);
 
 const apiAuth = Router()
   .use("/probe", probeController)
   .use("/connect", connectController);
 
-const apiProxy = Router()
-  .use("/identity", identityController);
+const apiProxy = Router().use("/identity", identityController);
 
 export default Router()
-   .use("/mh", apiMh)
-   .use("/director/api", apiDirector)
-   .use("/auth", apiAuth)
-   .use("/proxy", apiProxy);
+  .use("/mh", apiMh)
+  .use("/director/api", apiDirector)
+  .use("/auth", apiAuth)
+  .use("/proxy", apiProxy)
+  .use(
+    "//proxy",
+    apiProxy,
+  ) /* //proxy/identity/geoagerequirements?client_id=simpsons4-android-client  */;

@@ -7,14 +7,17 @@ import sqlite3 from "sqlite3";
 import config from "../../../../config.json" with { type: "json" };
 
 const db = new sqlite3.Database(
-      config.dataDirectory + "/users.db",
-      sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-      (error) => {
-        if (error) {
-          console.error("[users.controller.js] Error opening database:", error.message);
-          return;
-        }
-      },
+  config.dataDirectory + "/users.db",
+  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+  (error) => {
+    if (error) {
+      console.error(
+        "[users.controller.js] Error opening database:",
+        error.message,
+      );
+      return;
+    }
+  },
 );
 
 const router = Router();
@@ -41,7 +44,7 @@ router.put("/", async (req, res, next) => {
       return;
     }
 
-    const mh_uid = req.headers["mh_uid"]; 
+    const mh_uid = req.headers["mh_uid"];
 
     await db.get(QUERY, [applicationUserId], async (error, row) => {
       if (error) {
