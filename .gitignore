@@ -128,3 +128,12 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Data and Config Files
+data/*
+!data/.gitkeep
+
+config.json
+
+configs/*
+directions/*
