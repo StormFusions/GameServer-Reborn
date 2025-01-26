@@ -102,7 +102,7 @@ router.post("/token", async (req, res, next) => {
             pid_type: "AUTHENTICATOR_ANONYMOUS", // Probably not important, so we should be able to use it for mobile_ea_account too
             auth_time: 0,
           },
-          "SuperSecretKey",
+          "2Tok8RykmQD41uWDv5mI7JTZ7NIhcZAIPtiBm4Z5", // Thank you tehfens
         ),
         refresh_token: "NotImplemented", // Not Implemented Yet
         refresh_token_expires_in: 4242, // Not Implemented Yet
