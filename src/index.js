@@ -5,6 +5,7 @@ import compression from "compression";
 
 import { debugWithTime } from "./util/debugUtil.js";
 
+import 'dotenv/config';
 import config from "../config.json" with { type: "json" };
 
 import fs from "fs";
