@@ -33,7 +33,7 @@ const apiProxy = Router().use("/identity", identityController);
 export default Router()
   .use("/mh", apiMh)
   .use("/director/api", apiDirector)
-  .use("/auth", apiAuth)
+  .use("/", apiAuth)
   .use("/proxy", apiProxy)
   .use(
     "//proxy",
