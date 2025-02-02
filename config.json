@@ -1,7 +1,13 @@
 {
   "listenPort": 4242,
+
   "dataDirectory": "data",
+
   "startingDonuts": 0,
+
   "startingUID": 1000000000000,
-  "startingMID": 3042000000000000
+  "startingMID": 3042000000000000,
+
+  "serveDlcsLocally": true, 
+  "localDlcFolder": "./dlc"
 }
