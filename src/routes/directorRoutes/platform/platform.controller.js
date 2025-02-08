@@ -42,7 +42,7 @@ router.get("/:platform/getDirectionByPackage", async (req, res, next) => {
 router.get("/:platform/getDirectionByBundle", async (req, res, next) => {
   // Android
   try {
-    const packageId = req.query.bundleId;
+    const bundleId = req.query.bundleId;
     if (!packageId) {
       res.status(400).send("Error 400: No bundleId");
       return;
