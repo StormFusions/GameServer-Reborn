@@ -7,7 +7,7 @@ import userstatsController from "./mhRoutes/userstats/userstats.controller.js";
 import linkController from "./mhRoutes/link/link.controller.js";
 import clienttelemetryController from "./mhRoutes/clienttelemetry/clienttelemetry.controller.js";
 
-import androidController from "./directorRoutes/android/android.controller.js";
+import platformController from "./directorRoutes/platform/platform.controller.js";
 
 import probeController from "./authRoutes/probe/probe.controller.js";
 import connectController from "./authRoutes/connect/connect.controller.js";
@@ -22,7 +22,7 @@ const apiMh = Router()
   .use("/link", linkController)
   .use("/clienttelemetry", clienttelemetryController);
 
-const apiDirector = Router().use("/android", androidController);
+const apiDirector = Router().use("/", platformController);
 
 const apiAuth = Router()
   .use("/probe", probeController)

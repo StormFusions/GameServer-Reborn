@@ -5,11 +5,11 @@ import compression from "compression";
 
 import { debugWithTime } from "./util/debugUtil.js";
 
-import 'dotenv/config';
+import "dotenv/config";
 import config from "../config.json" with { type: "json" };
 
 import fs from "fs";
-import os from 'os';
+import os from "os";
 
 import sqlite3 from "sqlite3";
 
@@ -60,15 +60,15 @@ app.use(
 app.use(routes);
 
 if (config.serveDlcsLocally) {
-	debugWithTime("Serving DLCs from local directory: " + config.localDlcFolder);
-	
-	if (!fs.existsSync(config.localDlcFolder)) {
-		fs.mkdirSync(config.localDlcFolder);
-	}
+  debugWithTime("Serving DLCs from local directory: " + config.localDlcFolder);
 
-	app.use("/dlc", express.static(config.localDlcFolder));
+  if (!fs.existsSync(config.localDlcFolder)) {
+    fs.mkdirSync(config.localDlcFolder);
+  }
+
+  app.use("/dlc", express.static(config.localDlcFolder));
 } else {
-	debugWithTime("DLCs will not be served from a local directory.");
+  debugWithTime("DLCs will not be served from a local directory.");
 }
 
 app.get("/", (req, res) => {

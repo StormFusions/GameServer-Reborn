@@ -37,10 +37,10 @@ router.get("/auth", async (req, res, next) => {
 
         const newUID = row
           ? Number(row.UserId) + 1
-          : config.startingUID + 1 /* If there are no users */;
+          : config.startingUID + 1; /* If there are no users */
         const newMID = row
           ? Number(row.MayhemId) + 1
-          : config.startingMID + 1 /* If there are no users */;
+          : config.startingMID + 1; /* If there are no users */
 
         const newAccessToken = generateToken("AT", newUID.toString());
         const newAccessCode = generateToken("AC", newUID.toString());
@@ -95,7 +95,7 @@ router.post("/token", async (req, res, next) => {
             aud: "simpsons4-android-client",
             iss: "accounts.ea.com",
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 4242,
+            exp: Math.floor(Date.now() / 1000) + 42424242, // About 500 days
             pid_id: row.UserId.toString(), // All the same, so it's easier to handle
             user_id: row.UserId.toString(),
             persona_id: row.UserId,
@@ -123,17 +123,15 @@ router.get("/tokeninfo", async (req, res, next) => {
       "SELECT UserId FROM UserData WHERE UserAccessToken = ?;";
     await db.get(USER_BY_TOKEN_QUERY, [accessToken], async (error, row) => {
       if (!row) {
-        res
-          .status(400)
-          .send({
-            message: "No user could be found with that UserAccessToken",
-          });
+        res.status(400).send({
+          message: "No user could be found with that UserAccessToken",
+        });
         return;
       }
 
       let response = {
         client_id: "simpsons4-android-client", // Always the same
-        expires_in: 4242,
+        expires_in: 42424242, // About 500 days
         persona_id: row.UserId,
         pid_id: row.UserId.toString(),
         pid_type: "AUTHENTICATOR_ANONYMOUS",
