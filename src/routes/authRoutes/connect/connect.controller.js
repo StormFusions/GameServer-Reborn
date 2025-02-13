@@ -64,9 +64,6 @@ router.get("/auth", async (req, res, next) => {
       res.status(400).send({ message: "Unknown authenticator_login_type" });
       return;
     }
-
-    /*let accessCode = generateToken("AC", "1017814658519");
-    res.status(200).send({ "code": accessCode });*/
   } catch (error) {
     next(error);
   }
@@ -74,7 +71,6 @@ router.get("/auth", async (req, res, next) => {
 
 router.post("/token", async (req, res, next) => {
   try {
-    // Add actual reading of db
     const code = req.query.code;
 
     const USER_BY_CODE_QUERY =
@@ -89,13 +85,13 @@ router.post("/token", async (req, res, next) => {
 
       res.status(200).send({
         access_token: row.UserAccessToken,
-        expires_in: 4242, // Never expires (for now)
+        expires_in: 3155760000, // Never expires (for now)
         id_token: jwt.sign(
           {
             aud: "simpsons4-android-client",
             iss: "accounts.ea.com",
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 42424242, // About 500 days
+            exp: Math.floor(Date.now() / 1000) + 3155760000, // About 100 years
             pid_id: row.UserId.toString(), // All the same, so it's easier to handle
             user_id: row.UserId.toString(),
             persona_id: row.UserId,
@@ -105,7 +101,7 @@ router.post("/token", async (req, res, next) => {
           "2Tok8RykmQD41uWDv5mI7JTZ7NIhcZAIPtiBm4Z5", // Thank you tehfens
         ),
         refresh_token: "NotImplemented", // Not Implemented Yet
-        refresh_token_expires_in: 4242, // Not Implemented Yet
+        refresh_token_expires_in: 3155760000, // Not Implemented Yet
         token_type: "Bearer",
       });
     });
@@ -116,7 +112,6 @@ router.post("/token", async (req, res, next) => {
 
 router.get("/tokeninfo", async (req, res, next) => {
   try {
-    // Header for include authenticator etc
     const accessToken = req.headers["access_token"] || req.query.access_token;
 
     const USER_BY_TOKEN_QUERY =
@@ -131,7 +126,7 @@ router.get("/tokeninfo", async (req, res, next) => {
 
       let response = {
         client_id: "simpsons4-android-client", // Always the same
-        expires_in: 42424242, // About 500 days
+        expires_in: 3155760000, // About 100 years
         persona_id: row.UserId,
         pid_id: row.UserId.toString(),
         pid_type: "AUTHENTICATOR_ANONYMOUS",
