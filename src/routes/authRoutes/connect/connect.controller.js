@@ -85,13 +85,13 @@ router.post("/token", async (req, res, next) => {
 
       res.status(200).send({
         access_token: row.UserAccessToken,
-        expires_in: 3155760000, // Never expires (for now)
+        expires_in: 2147483647, // Never expires (for now)
         id_token: jwt.sign(
           {
             aud: "simpsons4-android-client",
             iss: "accounts.ea.com",
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 3155760000, // About 100 years
+            exp: Math.floor(Date.now() / 1000) + 2147483647, // About 68 years
             pid_id: row.UserId.toString(), // All the same, so it's easier to handle
             user_id: row.UserId.toString(),
             persona_id: row.UserId,
@@ -101,7 +101,7 @@ router.post("/token", async (req, res, next) => {
           "2Tok8RykmQD41uWDv5mI7JTZ7NIhcZAIPtiBm4Z5", // Thank you tehfens
         ),
         refresh_token: "NotImplemented", // Not Implemented Yet
-        refresh_token_expires_in: 3155760000, // Not Implemented Yet
+        refresh_token_expires_in: 2147483647, // Not Implemented Yet
         token_type: "Bearer",
       });
     });
@@ -126,7 +126,7 @@ router.get("/tokeninfo", async (req, res, next) => {
 
       let response = {
         client_id: "simpsons4-android-client", // Always the same
-        expires_in: 3155760000, // About 100 years
+        expires_in: 2147483647, // About 68 years
         persona_id: row.UserId,
         pid_id: row.UserId.toString(),
         pid_type: "AUTHENTICATOR_ANONYMOUS",
