@@ -1,5 +1,8 @@
 import { Router } from "express";
+
 import fs from "fs";
+
+import config from "../../../../config.json" with { type: "json" };
 
 const router = Router();
 
@@ -12,6 +15,14 @@ async function getDirectionContent(packageId, platform) {
 
     returnContent.clientId = `simpsons4-${platform}-client`;
     returnContent.mdmAppKey = `simpsons-4-${platform}`;
+
+    returnContent.serverData.forEach((item) => {
+      if (item.key.startsWith("nexus.")) {
+        item.value = `http://${config.ip}:${config.listenPort}/`;
+      } else if (item.key.startsWith("synergy.")) {
+        item.value = `http://${config.ip}:${config.listenPort}`;
+      }
+    });
   } catch (error) {
     if (error.code == "ENOENT") {
       return { message: "Could not find that packageId" };
@@ -40,7 +51,7 @@ router.get("/:platform/getDirectionByPackage", async (req, res, next) => {
 });
 
 router.get("/:platform/getDirectionByBundle", async (req, res, next) => {
-  // Android
+  // iOS
   try {
     const bundleId = req.query.bundleId;
     if (!packageId) {

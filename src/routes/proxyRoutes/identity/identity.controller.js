@@ -103,7 +103,7 @@ router.get("/pids/me/personas/:who", async (req, res, next) => {
 
       res.status(200).send({
         persona: {
-          anonymousId: crypto.randomBytes(10).toString("base64url"), // Not important, so just random
+          anonymousId: "user",
           dateCreated: "2024-12-12T15:42Z",
           displayName: "user",
           isVisible: true,
