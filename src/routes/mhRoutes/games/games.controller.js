@@ -25,7 +25,7 @@ router.get("/lobby/time", async (req, res, next) => {
   try {
     const xmlResponse = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		<Time>
-			<epochMilliseconds>${Math.floor(new Date().getTime())}</epochMilliseconds>
+			<epochMilliseconds>${global.lobbyTime == 0 ? Math.floor(new Date().getTime()) : global.lobbyTime}</epochMilliseconds>
 		</Time>
 		`; // Send the epoch(unix timestamp) time in XML
 

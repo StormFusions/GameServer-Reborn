@@ -1,14 +1,11 @@
 {
   "ip": "192.168.0.0",
   "listenPort": 4242,
-
+  "adminKey": "",
   "dataDirectory": "data",
-
   "startingDonuts": 0,
-
   "startingUID": 1000000000000,
   "startingMID": 3042000000000000,
-
-  "serveDlcsLocally": true, 
+  "serveDlcsLocally": true,
   "localDlcFolder": "./dlc"
 }

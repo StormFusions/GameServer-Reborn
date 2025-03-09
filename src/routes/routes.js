@@ -18,6 +18,20 @@ import identityController from "./proxyRoutes/identity/identity.controller.js";
 
 import trackingApiController from "./trackingRoutes/api/api.controller.js";
 
+import dashboardController from "./dashboardRoutes/dashboard.controller.js";
+
+const serverStatusMiddleware = (req, res, next) => {
+  if (req.originalUrl.startsWith("/dashboard")) {
+    // Can't turn the server on again without the dashboard
+    return next();
+  }
+
+  if (!global.running) {
+    return res.status(503).send("<h1>503 Service Temporarily Unavailable</h1>");
+  }
+  next(); // If the server status is set to online
+};
+
 const apiMh = Router()
   .use("/games", gamesController)
   .use("/gameplayconfig", gameplayconfigController)
@@ -39,6 +53,7 @@ const apiProxy = Router().use("/identity", identityController);
 const apiTrackingApi = Router().use("/", trackingApiController);
 
 export default Router()
+  .use(serverStatusMiddleware)
   .use("/mh", apiMh)
   .use("/director/api", apiDirector)
   .use("/user/api", apiUser)
@@ -48,4 +63,5 @@ export default Router()
     "//proxy",
     apiProxy,
   ) /* //proxy/identity/geoagerequirements?client_id=simpsons4-android-client  */
-  .use("/tracking/api", apiTrackingApi);
+  .use("/tracking/api", apiTrackingApi)
+  .use("/dashboard", dashboardController);

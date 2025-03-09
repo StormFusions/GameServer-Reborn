@@ -1,0 +1,16 @@
+doctype html
+html(lang="en")
+  head
+    title="Dashboard | Login"
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="/dashboard/assets/styles.css") 
+  body
+    .container.login-container
+      #error-message
+        p Incorrect key. Please try again.
+
+      form#login-form
+        input.password-field(type="password", id="key", name="key", placeholder="••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••")
+        button.login-button(type="submit") Login
+
+  script(src="/dashboard/assets/login.js")

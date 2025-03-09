@@ -7,11 +7,12 @@ import { debugWithTime } from "./util/debugUtil.js";
 
 import "dotenv/config";
 import config from "../config.json" with { type: "json" };
+const configFilePath = "./config.json";
 
 import fs from "fs";
-import os from "os";
-
 import sqlite3 from "sqlite3";
+
+import { randomBytes } from "crypto";
 
 const db = new sqlite3.Database(
   config.dataDirectory + "/users.db",
@@ -23,8 +24,15 @@ const db = new sqlite3.Database(
   },
 );
 
+// Make a key for the admin dashboard if it doesn't already exist
+if (!config.adminKey) config.adminKey = randomBytes(32).toString("hex"); // Random key that looks similar to a SHA256 hash
+await fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2)); // Update the file too, since "config.adminKey = " just changes it in memory
+
 const app = express();
 const PORT = process.env.LISTEN_PORT || config.listenPort;
+
+app.set("view engine", "pug");
+app.set("views", "./src/views");
 
 const QUERY =
   "CREATE TABLE IF NOT EXISTS UserData (MayhemId int unique, UserId int unique, UserAccessToken string, UserAccessCode string, UserRefreshToken string, SessionId string unique, SessionKey string unique, WholeLandToken string, LandSavePath string, CurrencySavePath string);";
@@ -81,4 +89,6 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   debugWithTime(`Listening on port ${PORT}`);
+  global.running = true; // For the dashboard
+  global.lobbyTime = 0; // 0 for current time
 });

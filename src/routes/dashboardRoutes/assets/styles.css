@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #f6f6f6;
+  background-color: #111110;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  user-drag: none;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  height: 92.5vh;
+
+  padding: 1rem;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#error-message {
+  display: none;
+  font-weight: bold;
+  background-color: red;
+
+  padding: 0.5rem;
+
+  border-radius: 8px;
+}
+
+#login-form {
+  margin: auto;
+  width: 80%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-field {
+  text-align: center;
+  width: 25rem;
+}
+
+a,
+a:visited,
+a:active,
+a:hover {
+  color: #f6f6f6;
+  text-decoration: none;
+}
+
+input,
+button,
+select {
+  color: #ffffff;
+  background-color: #115587;
+}
+
+select {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.7em 0.2em;
+  max-width: 20rem;
+  font-size: 1em;
+}
+
+button:active {
+  background-color: #0098ED;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+input,
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.8em 1.6em;
+  margin: 0.5rem;
+  font-size: 1em;
+  font-weight: bold;
+  font-family: inherit;
+  transition: border-color 0.25s;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  column-gap: 3rem;
+  row-gap: 1rem;
+
+  padding-block: 2rem;
+
+  border-radius: 1rem;
+  border-style: solid;
+  border-width: 5%;
+  border-color: #115587;
+
+  background-color: #1155871F;
+}
+
+.navbar {
+  width: 100%;
+
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  gap: 1rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-item {
+  display: inline;
+  height: 100%;
+}
+
+.navbar-item a {
+  display: block;
+  border-radius: 0.25rem;
+
+  width: 8rem;
+
+  text-align: center;
+  text-decoration: none;
+
+  font-size: 1.25rem;
+  font-weight: bold;
+
+  padding-inline: 1.5rem;
+  padding-block: 0.8rem;
+
+  background-color: #115587;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.navbar-item a:active {
+  background-color: #0098ED;
+}
+
+.logout-button {
+  position: absolute;
+  right: 0px;
+
+  margin: 5rem; a
+
+  aspect-ratio: 1/1;
+  height: 5rem;
+  width: 5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #00000000;
+  color: #ffffff;
+
+  box-shadow: none;
+}
+
+.wrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: auto 0fr;
+  gap: 0.5rem;
+
+  flex-grow: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 1rem;
+
+  border-radius: 1rem;
+  border-style: solid;
+  border-width: 5%;
+  border-color: #115587;
+
+  font-size: 1.25rem;
+}
+
+.content label {
+  font-weight: bold;
+}
+
+.content div {
+  display: block;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.content-divider {
+  display: flex;
+  width: 1rem;
+
+  margin: 0;
+  padding: 0;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-actions label {
+  margin: 2rem;
+}
+
+.quick-actions-buttons {
+  display: flex;
+  flex-direction: row;
+}
+
+.event-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-info label {
+  margin: 2rem;
+}
+
+.event-info-content {
+  display: flex;
+}
+
+.event-info-content div {
+  text-align: center;
+  display: block;
+  white-space: nowrap;
+  overflow: visible;
+}
