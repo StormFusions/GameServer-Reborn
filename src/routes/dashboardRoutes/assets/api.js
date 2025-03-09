@@ -43,12 +43,18 @@ class Api {
       await fetch("/dashboard/api/event/get", {
         method: "GET",
       })
-        .then((response) => response.json())
-        .then((response) => {
+        .then(response => response.json())
+        .then(async response => {
           if (document.getElementById("event-div")) {
             const eventElement = document.getElementById("event-div");
 
-            eventElement.textContent = response.lobbyTime;
+            await fetch("/dashboard/assets/events.json")
+              .then(response => response.json())
+              .then(data => {
+                const event = Object.values(data).flat().find(e => e.timestamp == response.lobbyTime);
+                const eventName = event ? event.name : `No event found for the current timestamp: ${response.lobbyTime}`;
+                document.getElementById("event-div").textContent = eventName;
+              });
           }
         });
     } catch (error) {

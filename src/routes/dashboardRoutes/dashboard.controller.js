@@ -48,7 +48,6 @@ router.post("/login", async (req, res, next) => {
     if (key == config.adminKey) {
       res.cookie("adminKey", key, {
         httpOnly: true, // Prevent client-side JS from accessing the cookie
-        secure: true,
         sameSite: "Strict",
         maxAge: 1728000000, // 48 hours
       });
