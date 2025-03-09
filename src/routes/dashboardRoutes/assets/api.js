@@ -51,8 +51,13 @@ class Api {
             await fetch("/dashboard/assets/events.json")
               .then(response => response.json())
               .then(data => {
-                const event = Object.values(data).flat().find(e => e.timestamp == response.lobbyTime);
-                const eventName = event ? event.name : `No event found for the current timestamp: ${response.lobbyTime}`;
+                let eventName = "Now";
+
+                if (response.lobbyTime != 0) {
+                  const event = Object.values(data).flat().find(e => e.timestamp == response.lobbyTime);
+                  eventName = event ? event.name : `No event found for the current timestamp: ${response.lobbyTime}`;
+                }
+
                 document.getElementById("event-div").textContent = eventName;
               });
           }
