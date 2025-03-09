@@ -52,7 +52,11 @@ db.close((error) => {
 });
 
 app.use((req, res, next) => {
-  debugWithTime(`${req.method} ${req.originalUrl}`);
+  res.on("finish", () => {
+    if (res.statusCode !== 404 || config.verbose) {
+      debugWithTime(`${req.method} ${req.originalUrl} [${res.statusCode}]`);
+    }
+  });
   next();
 });
 
