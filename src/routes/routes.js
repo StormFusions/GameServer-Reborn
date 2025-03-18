@@ -19,6 +19,7 @@ import identityController from "./proxyRoutes/identity/identity.controller.js";
 import trackingApiController from "./trackingRoutes/api/api.controller.js";
 
 import dashboardController from "./dashboardRoutes/dashboard.controller.js";
+import userdashController from "./dashboardRoutes/userdash.controller.js";
 
 const serverStatusMiddleware = (req, res, next) => {
   if (req.originalUrl.startsWith("/dashboard")) {
@@ -64,4 +65,5 @@ export default Router()
     apiProxy,
   ) /* //proxy/identity/geoagerequirements?client_id=simpsons4-android-client  */
   .use("/tracking/api", apiTrackingApi)
-  .use("/dashboard", dashboardController);
+  .use("/dashboard", dashboardController)
+  .use("/userdash", userdashController);

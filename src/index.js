@@ -26,7 +26,7 @@ const db = new sqlite3.Database(
 
 // Make a key for the admin dashboard if it doesn't already exist
 if (!config.adminKey) config.adminKey = randomBytes(32).toString("hex"); // Random key that looks similar to a SHA256 hash
-await fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2)); // Update the file too, since "config.adminKey = " just changes it in memory
+fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2)); // Update the file too, since "config.adminKey = " just changes it in memory
 
 const app = express();
 const PORT = process.env.LISTEN_PORT || config.listenPort;
@@ -35,8 +35,8 @@ app.set("view engine", "pug");
 app.set("views", "./src/views");
 
 const QUERY =
-  "CREATE TABLE IF NOT EXISTS UserData (MayhemId int unique, UserId int unique, UserAccessToken string, UserAccessCode string, UserRefreshToken string, SessionId string unique, SessionKey string unique, WholeLandToken string, LandSavePath string, CurrencySavePath string);";
-await db.run(QUERY, async (error) => {
+  "CREATE TABLE IF NOT EXISTS UserData (MayhemId int unique, UserId int unique, UserName text unique, UserEmail text unique, UserCred int, UserAccessToken string unique, UserAccessCode string unique, UserRefreshToken string unique, SessionId string unique, SessionKey string unique, WholeLandToken string, LandSavePath string, CurrencySavePath string);";
+db.run(QUERY, async (error) => {
   // Make sure database is initialized
   if (error) {
     console.error("Could not initialize database: ", error.message);

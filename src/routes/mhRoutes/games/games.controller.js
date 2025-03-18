@@ -120,10 +120,10 @@ router.post(
         if (!userData.WholeLandToken && (!force || force != "1")) {
           res
             .type("application/xml")
-            .status(400)
+            .status(200)
             .send(
               `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="400" type="RESOURCE_ALREADY_EXISTS"/>`,
+					<error code="409" type="RESOURCE_ALREADY_EXISTS"/>`,
             );
           return;
         }
@@ -306,7 +306,7 @@ router.post(
 
         if (!decodedBody.token == userData.WholeLandToken) {
           // Request land update token and saved land update token are not the same
-          root = await protobuf.load("TappedOut.proto");
+          const root = await protobuf.load("TappedOut.proto");
           const DeleteTokenResponse = root.lookupType(
             "Data.DeleteTokenResponse",
           );

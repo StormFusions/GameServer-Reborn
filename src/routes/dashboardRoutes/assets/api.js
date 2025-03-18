@@ -43,25 +43,59 @@ class Api {
       await fetch("/dashboard/api/event/get", {
         method: "GET",
       })
-        .then(response => response.json())
-        .then(async response => {
+        .then((response) => response.json())
+        .then(async (response) => {
           if (document.getElementById("event-div")) {
             const eventElement = document.getElementById("event-div");
 
             await fetch("/dashboard/assets/events.json")
-              .then(response => response.json())
-              .then(data => {
+              .then((response) => response.json())
+              .then((data) => {
                 let eventName = "Now";
 
                 if (response.lobbyTime != 0) {
-                  const event = Object.values(data).flat().find(e => e.timestamp == response.lobbyTime);
-                  eventName = event ? event.name : `No event found for the current timestamp: ${response.lobbyTime}`;
+                  const event = Object.values(data)
+                    .flat()
+                    .find((e) => e.timestamp == response.lobbyTime);
+                  eventName = event
+                    ? event.name
+                    : `No event found for the current timestamp: ${response.lobbyTime}`;
                 }
 
                 document.getElementById("event-div").textContent = eventName;
               });
           }
         });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async signUp() {
+    try {
+      const emailInput = document.getElementById("email-input");
+
+      await fetch("/userdash/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: emailInput.value }),
+      })
+      .then(async response => {
+        if (response.ok) {
+          document.getElementById("info-message").style.backgroundColor = "#008ff5";
+          document.getElementById("info-message").style.display = "block";
+
+          document.getElementById("info-message").innerHTML = await response.text();
+        } else {
+          document.getElementById("info-message").style.backgroundColor = "red";
+          document.getElementById("info-message").style.display = "block";
+
+          document.getElementById("info-message").innerHTML = await response.text();
+        }
+      });
+
     } catch (error) {
       console.error(error);
     }

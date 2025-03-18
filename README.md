@@ -1,4 +1,4 @@
-# GameServer-Reborn  
+# GameServer-Reborn
 Multi-User Private Server for The Simpsons™: Tapped Out Mobile Game
 
 ## Getting Started
@@ -11,15 +11,15 @@ To run this server, you'll need [Node.js](https://nodejs.org/) installed. You ca
 
 Follow these steps to set up the server:
 
-1. **Clone the Repository**  
-   
+1. **Clone the Repository**
+
    Start by cloning the project to your local machine:
    ```sh
    git clone https://github.com/TappedOutReborn/GameServer-Reborn.git
    ```
 
 2. **Install Dependencies**
-   
+
    Navigate into the project folder and install the required NPM packages:
    ```sh
    cd GameServer-Reborn
@@ -35,7 +35,7 @@ Follow these steps to set up the server:
    - Drag and drop the downloaded DLC files into the `dlc` folder.
 
 4. **Configure Server Settings**
-   
+
    Open the `config.json` file and update the ip and listenPort values to match your preferred settings:
    ```json
     "ip": "0.0.0.0",
@@ -43,7 +43,7 @@ Follow these steps to set up the server:
    ```
 
    **ip**: The IP address or domain that the game client will use to connect to your server (ensure this is accessible by the game). **Do NOT use `localhost`, `127.0.0.1` or `0.0.0.0`**
-   
+
    **listenPort**: The port number the server will listen on.
 
 
@@ -54,7 +54,23 @@ To start the server, simply run:
 npm start
 ```
 
-## Using your old town
+## Using the Dashboard(s)
+
+- On the admin dashboard you can configure server settings and the current event. A user manager and town manager is planned.
+
+- On the user dashboard you can make an email account. Adding friends and changing your username is are planned features for the user dashboard.
+
+### Admin Dashboard
+To access the admin dashboard you'll need the admin key. It will be automaticly generated on server startup if it's not set, and can be found in `config.json`. To use the admin dashboard simply navigate to:
+```
+http://yourip:yourport/dashboard
+```
+
+### User Dashboard
+To use the user dashboard simply navigate to:
+```
+http://yourip:yourport/userdash
+```
 
 ### Top Contributors:
 

@@ -78,7 +78,7 @@ router.put("/", async (req, res, next) => {
           .status(400)
           .send(
             `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="400" type="BAD_REQUEST" field="AcessToken and UserId does not match"/>`,
+					<error code="400" type="BAD_REQUEST" field="AccessToken and UserId does not match"/>`,
           );
         return;
       }
@@ -99,6 +99,58 @@ router.put("/", async (req, res, next) => {
 
       res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
       res.send(UsersResponseMessage.encode(message).finish());
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/", async (req, res, next) => {
+  try {
+    const reqToken =
+      req.headers["nucleus_token"] || req.headers["mh_auth_params"];
+    if (!reqToken) {
+      res
+        .type("application/xml")
+        .status(400)
+        .send(
+          `<?xml version="1.0" encoding="UTF-8"?>
+			<error code="400" type="MISSING_VALUE" field="nucleus_token"/>`,
+        );
+      return;
+    }
+
+    const MAYHEMID_BY_TOKEN = "SELECT MayhemId FROM UserData WHERE UserAccessToken = ?"
+    await db.get(MAYHEMID_BY_TOKEN, [reqToken], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res
+          .type("application/xml")
+          .status(500)
+          .send(
+            `<?xml version="1.0" encoding="UTF-8"?>
+					<error code="500" type="INTERNAL_SERVER_ERROR"/>`,
+          );
+        return;
+      }
+
+      if (!row) {
+        res
+          .status(404)
+          .send("Could not find a user with that token");
+        return;
+      }
+
+      res
+        .type("application/xml")
+        .status(500)
+        .send(
+          `<?xml version="1.0" encoding="UTF-8"?>
+        <Resources>
+          <URI>/users/${row.MayhemId}</URI>
+        </Resources>`,
+        );
+
     });
   } catch (error) {
     next(error);

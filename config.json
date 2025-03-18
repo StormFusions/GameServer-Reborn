@@ -1,12 +1,18 @@
 {
+  "verbose": true,
   "ip": "192.168.0.0",
   "listenPort": 4242,
-  "verbose": true,
-  "adminKey": "",
   "dataDirectory": "data",
   "startingDonuts": 0,
   "startingUID": 1000000000000,
   "startingMID": 3042000000000000,
+  "adminKey": "",
+  "useSMTP": false,
+  "SMTPhost": "mail.example.com",
+  "SMTPport": 465,
+  "SMTPsecure": true,
+  "SMTPuser": "user",
+  "SMTPpass": "pass",
   "serveDlcsLocally": true,
   "localDlcFolder": "./dlc"
 }

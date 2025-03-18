@@ -1,0 +1,21 @@
+doctype html
+html(lang="en")
+  head
+    title="Userdash"
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="/dashboard/assets/userdash.css")
+  body
+    .container
+      #info-message
+        p Info here
+
+      .content
+        input#email-input(placeholder="email@domain.com")
+        button(onclick="API.signUp()") Sign Up
+
+        label.current-users Current Users: Loading...
+
+    footer
+      label We are not affiliated with The Walt Disney Company and/or EA.
+
+  script(src="/dashboard/assets/api.js")
