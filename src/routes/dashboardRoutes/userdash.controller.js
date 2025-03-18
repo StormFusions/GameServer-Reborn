@@ -4,6 +4,8 @@ import sqlite3 from "sqlite3";
 
 import config from "../../../config.json" with { type: "json" };
 
+import { randomBytes } from "crypto";
+
 import generateToken from "../authRoutes/connect/tokenGen.js";
 
 const db = new sqlite3.Database(
@@ -57,7 +59,7 @@ router.post("/signup", async (req, res, next) => {
       const newAccessCode = generateToken("AC", newUID.toString());
 
       const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserEmail, UserName, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?, ?, ?)`;
-      await db.get(NEW_USER_QUERY, [newUID, newMID, email, email.split("@")[0], newAccessToken, newAccessCode], async (error, row) => {
+      await db.get(NEW_USER_QUERY, [newUID, newMID, email, `${email.split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode], async (error, row) => {
         if (error) {
           if (error.message.includes('SQLITE_CONSTRAINT: UNIQUE constraint failed: UserData.UserEmail')) {
             res.status(400).send("Email already in use");
