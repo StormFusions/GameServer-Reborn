@@ -423,17 +423,8 @@ router.get(
         }
         const serializedSaveData = fs.readFileSync(savePath);
 
-        const root = await protobuf.load("TappedOut.proto");
-        const LandMessage = root.lookupType("Data.LandMessage");
-
-        const decodedMessage = LandMessage.decode(serializedSaveData);
-
-        if (decodedMessage.id != landId) {
-          decodedMessage.id = landId;
-        }
-
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-        res.send(LandMessage.encode(decodedMessage).finish());
+        res.send(serializedSaveData);
       });
     } catch (error) {
       next(error);
@@ -636,8 +627,15 @@ router.post(
           return;
         }
 
+        const root = await protobuf.load("TappedOut.proto");
+        const LandMessage = root.lookupType("Data.LandMessage");
+
+        const decodedMessage = LandMessage.decode(req.body);
+
+        decodedMessage.id = landId;
+
         // Override file with updated town
-        fs.writeFileSync(savePath, req.body, { flag: "w+" }, (err) => {
+        fs.writeFileSync(savePath, LandMessage.encode(decodedMessage).finish(), { flag: "w+" }, (err) => {
           console.error(err);
         });
 
