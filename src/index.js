@@ -3,6 +3,7 @@ import routes from "./routes/routes.js";
 
 import compression from "compression";
 
+import chalk from "chalk";
 import { debugWithTime } from "./util/debugUtil.js";
 
 import "dotenv/config";
@@ -28,9 +29,18 @@ const db = new sqlite3.Database(
 if (!config.adminKey) config.adminKey = randomBytes(32).toString("hex"); // Random key that looks similar to a SHA256 hash
 fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2)); // Update the file too, since "config.adminKey = " just changes it in memory
 
+// Reset log
+if (fs.existsSync("latest.log"))
+  fs.rmSync("latest.log");
+
 const app = express();
 const PORT = process.env.LISTEN_PORT || config.listenPort;
 
+// Disable unnecessary Express features
+app.disable("x-powered-by");
+app.disable("etag");
+
+// Setup Pug
 app.set("view engine", "pug");
 app.set("views", "./src/views");
 
@@ -54,7 +64,7 @@ db.close((error) => {
 app.use((req, res, next) => {
   res.on("finish", () => {
     if (res.statusCode !== 404 || config.verbose) {
-      debugWithTime(`${req.method} ${req.originalUrl} [${res.statusCode}]`);
+      debugWithTime(0, chalk.blue(req.method) + ` ${req.originalUrl} ` + chalk.magenta(`[${res.statusCode}]`));
     }
   });
   next();
@@ -66,13 +76,14 @@ app.use(
       return true; // Always compress the response
     },
     threshold: 0,
+    level: 6, // Good balance between compression ratio and CPU usage
   }),
 );
 
 app.use(routes);
 
 if (config.serveDlcsLocally) {
-  debugWithTime("Serving DLCs from local directory: " + config.localDlcFolder);
+  debugWithTime(0, "Serving DLCs from local directory: " + config.localDlcFolder);
 
   if (!fs.existsSync(config.localDlcFolder)) {
     fs.mkdirSync(config.localDlcFolder);
@@ -80,7 +91,7 @@ if (config.serveDlcsLocally) {
 
   app.use("/dlc", express.static(config.localDlcFolder));
 } else {
-  debugWithTime("DLCs will not be served from a local directory.");
+  debugWithTime(1, "DLCs will not be served from a local directory.");
 }
 
 app.get("/", (req, res) => {
@@ -91,8 +102,13 @@ app.use((req, res) => {
   res.status(404).send("Do'h! Error 404");
 });
 
-app.listen(PORT, () => {
-  debugWithTime(`Listening on port ${PORT}`);
+app.use((err, req, res, next) => {
+  debugWithTime(2, err);
+  res.status(500).send("Do'h! Error 500");
+});
+
+app.listen(PORT, () => { 
+  debugWithTime(0, `Listening on port ${PORT}`);
   global.running = true; // For the dashboard
   global.lobbyTime = 0; // 0 for current time
 });

@@ -44,7 +44,7 @@ router.get("/pids/:who/personas", async (req, res, next) => {
     }
 
     const USER_BY_UID_QUERY =
-      "SELECT UserId, UserAccessToken FROM UserData WHERE UserId = ?;";
+      "SELECT UserId, UserAccessToken, UserEmail, UserName FROM UserData WHERE UserId = ?;";
     await db.get(USER_BY_UID_QUERY, [req.params.who], async (error, row) => {
       if (!row) {
         res
@@ -62,14 +62,12 @@ router.get("/pids/:who/personas", async (req, res, next) => {
         personas: {
           persona: [
             {
-              dateCreated: "2024-11-05T18:35Z", // Not important, so random date
+              dateCreated: "2024-12-12T15:42Z",
               displayName: row.UserName ? row.UserName : "user",
               isVisible: true,
               lastAuthenticated: "",
               name: row.UserName ? row.UserName : "user",
-              namespaceName: row.UserEmail
-                ? "cem_ea_id"
-                : "gsp-redcrow-simpsons4",
+              namespaceName: row.UserEmail ? "cem_ea_id" : "gsp-redcrow-simpsons4",
               personaId: row.UserId,
               pidId: row.UserId,
               showPersona: "EVERYONE",

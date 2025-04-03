@@ -10,6 +10,7 @@
   "description": "",
   "type": "module",
   "dependencies": {
+    "chalk": "^5.4.1",
     "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
