@@ -423,8 +423,15 @@ router.get(
         }
         const serializedSaveData = fs.readFileSync(savePath);
 
+        const root = await protobuf.load("TappedOut.proto");
+        const LandMessage = root.lookupType("Data.LandMessage");
+
+        const decodedMessage = LandMessage.decode(serializedSaveData);
+
+        decodedMessage.id = landId;
+
         res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-        res.send(serializedSaveData);
+        res.send(LandMessage.encode(decodedMessage).finish());
       });
     } catch (error) {
       next(error);

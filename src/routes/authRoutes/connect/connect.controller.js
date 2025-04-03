@@ -267,9 +267,7 @@ router.get("/tokeninfo", async (req, res, next) => {
       }
 
       let response = {
-        client_id: row.UserEmail
-          ? "long_live_token"
-          : "simpsons4-android-client",
+        client_id: "long_live_token"
         expires_in: 368435455, // About 11 years
         persona_id: row.UserId,
         pid_id: row.UserId.toString(),
