@@ -209,7 +209,6 @@ router.post("/api/sendCode", async (req, res, next) => {
         });
 
         const newCode = randomInt(10000, 99999);
-        console.log(newCode);
 
         const mailOptions = {
           from: config.SMTPuser,
