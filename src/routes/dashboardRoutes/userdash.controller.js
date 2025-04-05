@@ -13,6 +13,8 @@ import { randomBytes } from "crypto";
 
 import generateToken from "../authRoutes/connect/tokenGen.js";
 
+import fs from "fs";
+
 const db = new sqlite3.Database(
   config.dataDirectory + "/users.db",
   sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
@@ -370,7 +372,7 @@ router.post("/api/uploadTown", fileUpload(), async (req, res, next) => {
 
     if (!req.files?.town) return res.status(400).send("No town uploaded");
 
-    const USERINFO_BY_TOKEN_QUERY = "SELECT LandSavePath from UserData WHERE UserAccessToken = ?;";
+    const USERINFO_BY_TOKEN_QUERY = "SELECT LandSavePath, MayhemId from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
         console.error("Error executing query:", error.message);
@@ -383,8 +385,25 @@ router.post("/api/uploadTown", fileUpload(), async (req, res, next) => {
         return;
       }
 
+      let savePath = row.LandSavePath;
+      if (!savePath) {
+        savePath = `${config.dataDirectory}/${row.MayhemId}/${row.MayhemId}.land`;
+
+        const UPDATE_QUERY = `UPDATE UserData SET LandSavePath = ? WHERE MayhemId = ?`;
+        db.run(UPDATE_QUERY, [savePath, row.MayhemId], async function (error) {
+          if (error) {
+            console.error("Error:", error.message);
+            res.status(500).send("Internal error");
+            return;
+          }
+        });
+      }
+
+      if (!fs.existsSync(config.dataDirectory + "/" + row.MayhemId))
+        fs.mkdirSync(config.dataDirectory + "/" + row.MayhemId);
+
       const town = req.files.town;
-      town.mv(row.LandSavePath, (err) => {
+      town.mv(savePath, (err) => {
         if (err) return res.status(500).send(err);
 
         res.status(200).send("Town uploaded");
@@ -409,6 +428,11 @@ router.get("/api/exportTown", fileUpload(), async (req, res, next) => {
 
       if (!row) {
         res.status(400).send("No user found with that token")
+        return;
+      }
+
+      if (!row.LandSavePath) {
+        res.status(500).send("Land not found");
         return;
       }
 

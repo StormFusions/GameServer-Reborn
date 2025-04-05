@@ -518,7 +518,7 @@ router.put(
           savePath = `${config.dataDirectory}/${landId}/${landId}.land`;
           db.run(UPDATE_QUERY, [savePath, landId], async function (error) {
             if (error) {
-              console.error("Error updating WholeLandToken:", error.message);
+              console.error("Error updating LandSavePath:", error.message);
               res
                 .type("application/xml")
                 .status(500)
@@ -531,7 +531,8 @@ router.put(
           });
         }
 
-        fs.mkdirSync(config.dataDirectory + "/" + landId);
+        if (!fs.existsSync(config.dataDirectory + "/" + landId))
+          fs.mkdirSync(config.dataDirectory + "/" + landId);
 
         // Override file with req.body
         fs.writeFileSync(savePath, req.body, { flag: "w+" }, (err) => {
