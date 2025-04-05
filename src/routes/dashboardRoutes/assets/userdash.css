@@ -149,6 +149,9 @@ button {
   flex-grow: 1;
 
   width: 100%;
+
+  flex: 1;
+  min-height: 0;
 }
 
 .box {
@@ -178,7 +181,7 @@ button {
 
 .box div {
   display: block;
-  white-space: nowrap;
+  white-space: normal;
   overflow: visible;
 }
 
@@ -194,4 +197,48 @@ button {
   display: flex;
   flex-grow: 1;
   flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+.infobox {
+  display: flex;
+
+  flex-grow: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 1rem;
+  border-style: solid;
+  border-width: 5%;
+  border-color: #115587;
+
+  background-color: #111110EF;
+
+  font-size: 1.25rem;
+
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.infobox div {
+  display: block;
+  white-space: normal;
+  overflow: visible;
+
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.infobox p {
+  margin: 0.5rem 0;
+  word-break: break-word;
 }
