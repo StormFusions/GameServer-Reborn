@@ -196,8 +196,19 @@ router.post("/api/sendCode", async (req, res, next) => {
         res.status(400).send("Could not find a user with the email");
         return;
       }
+	
+      if(config.useTSTO_API) {
+	      try {
+          const url = `https://api.tsto.app/api/auth/sendCode?apikey=${encodeURIComponent(config.TSTO_APIkey)}&emailAddress=${encodeURIComponent(email)}&teamName=${encodeURIComponent(config.TSTO_APIteam)}`;
+          const resp = await fetch(url, { method: "POST" });
+          const data = await resp.json();
 
-      if (config.useSMTP) {
+          const UPDATE_CRED_BY_EMAIL = "UPDATE UserData SET UserCred = ? WHERE UserEmail = ?;";
+          await db.run(UPDATE_CRED_BY_EMAIL, [data.code, email]);
+        } catch (err) {
+          console.error(err.message); 
+        }
+      } else if (config.useSMTP) {
         const transporter = nodemailer.createTransport({
           host: config.SMTPhost,
           port: config.SMTPport,
