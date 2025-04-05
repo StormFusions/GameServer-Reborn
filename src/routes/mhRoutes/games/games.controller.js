@@ -423,15 +423,20 @@ router.get(
         }
         const serializedSaveData = fs.readFileSync(savePath);
 
-        const root = await protobuf.load("TappedOut.proto");
-        const LandMessage = root.lookupType("Data.LandMessage");
+        try {
+          const root = await protobuf.load("TappedOut.proto");
+          const LandMessage = root.lookupType("Data.LandMessage");
 
-        const decodedMessage = LandMessage.decode(serializedSaveData);
+          const decodedMessage = LandMessage.decode(serializedSaveData);
 
-        decodedMessage.id = landId;
+          decodedMessage.id = landId;
 
-        res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-        res.send(LandMessage.encode(decodedMessage).finish());
+          res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
+          res.send(LandMessage.encode(decodedMessage).finish());
+        } catch (error) {
+          res.status(500).send("Internal erorr");
+        }
+
       });
     } catch (error) {
       next(error);
@@ -635,23 +640,27 @@ router.post(
           return;
         }
 
-        const root = await protobuf.load("TappedOut.proto");
-        const LandMessage = root.lookupType("Data.LandMessage");
+        try {
+          const root = await protobuf.load("TappedOut.proto");
+          const LandMessage = root.lookupType("Data.LandMessage");
 
-        const decodedMessage = LandMessage.decode(req.body);
+          const decodedMessage = LandMessage.decode(req.body);
 
-        decodedMessage.id = landId;
+          decodedMessage.id = landId;
 
-        // Override file with updated town
-        fs.writeFileSync(savePath, LandMessage.encode(decodedMessage).finish(), { flag: "w+" }, (err) => {
-          console.error(err);
-        });
+          // Override file with updated town
+          fs.writeFileSync(savePath, LandMessage.encode(decodedMessage).finish(), { flag: "w+" }, (err) => {
+            console.error(err);
+          });
 
-        res.type("application/xml"); // Make sure the client knows it's xml
-        res.send(
-          `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-				<WholeLandUpdateResponse/>`,
-        );
+          res.type("application/xml"); // Make sure the client knows it's xml
+          res.send(
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <WholeLandUpdateResponse/>`,
+          );
+        } catch (error) {
+          res.status(500).send("Internal erorr");
+        }
       });
     } catch (error) {
       next(error);
