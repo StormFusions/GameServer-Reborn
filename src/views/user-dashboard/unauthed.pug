@@ -1,21 +1,14 @@
 doctype html
 html(lang="en")
   head
-    title="Userdash | Sign Up"
+    title="Userdash"
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/userdash.css")
   body
     .container
-      #info-message
-        p Info here
-
       .content
-        h2(style="margin: 10px;") Sign Up
-
-        input#email-input(placeholder="email@domain.com")
-        button(onclick="API.signUp()") Sign Up
-
-        label.current-users Current Users: Loading...
+        button(onclick="window.location=\"/userdash/login\";", style="width: 100%;") Login
+        button(onclick="window.location=\"/userdash/signup\";", style="width: 100%;") Sign Up
 
     footer
       label We are not affiliated with The Walt Disney Company and/or EA.

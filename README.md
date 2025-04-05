@@ -58,7 +58,7 @@ npm start
 
 - On the admin dashboard you can configure server settings and the current event. A user manager and town manager is planned.
 
-- On the user dashboard you can make an email account. Adding friends and changing your username is are planned features for the user dashboard.
+- On the user dashboard you can make an email account, login and change your username and email, and import and export your town. Adding friends is a planned for the user dashboard.
 
 ### Admin Dashboard
 To access the admin dashboard you'll need the admin key. It will be automaticly generated on server startup if it's not set, and can be found in `config.json`. To use the admin dashboard simply navigate to:

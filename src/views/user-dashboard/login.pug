@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
   head
-    title="Userdash | Sign Up"
+    title="Userdash | Login"
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/userdash.css")
   body
@@ -10,10 +10,12 @@ html(lang="en")
         p Info here
 
       .content
-        h2(style="margin: 10px;") Sign Up
+        h2(style="margin: 10px;") Login
 
         input#email-input(placeholder="email@domain.com")
-        button(onclick="API.signUp()") Sign Up
+        input#code-input(type="number", placeholder="12345", style="display: none;")
+        button#code-button(onclick="API.sendCode()") Send Code
+        button#login-button(onclick="API.login()", style="display: none;") Validate Code
 
         label.current-users Current Users: Loading...
 

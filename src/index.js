@@ -73,7 +73,8 @@ app.use((req, res, next) => {
 app.use(
   compression({
     filter: () => true,
-    threshold: 0
+    threshold: 0,
+    level: 6, // Good balance between compression ratio and CPU usage
   }),
 );
 

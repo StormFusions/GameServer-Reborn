@@ -1,0 +1,37 @@
+doctype html
+html(lang="en")
+  head
+    title="Userdash"
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="/dashboard/assets/userdash.css")
+  body
+    .container(style="display: flex; flex-direction: column; height: 92.5vh; padding: 1rem;")
+      .wrapper
+        .box
+          h3 Account Operations
+          .row
+            input#username-input
+            button(onclick="API.changeUsername()") Change Username
+          .row
+            input#email-input
+            button(onclick="API.changeEmail()") Change Email
+
+          .row
+            button(onclick="API.logout()") Logout
+
+            button#delete-button(style="background-color: red;", onclick="API.areYouSure()") Delete Account
+
+        .box
+          h3 Town Operations
+          .row
+            form#town-form(enctype="multipart/form-data")
+              input#town-input(type="file", name="town", accept=".pb, .land", required="true")
+              button(type="submit") Upload
+          .row
+            button(onClick="API.downloadFile()") Export Town
+
+        .box
+          h3 Friends
+          p Soon...
+
+  script(src="/dashboard/assets/api.js")

@@ -1,5 +1,10 @@
 import { Router, json } from "express";
 
+import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
+
+import nodemailer from "nodemailer";
+
 import sqlite3 from "sqlite3";
 
 import config from "../../../config.json" with { type: "json" };
@@ -20,9 +25,38 @@ const db = new sqlite3.Database(
 
 const router = Router();
 
+router.use(cookieParser());
 router.use(json());
 
+function randomInt(min, max) { // https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 router.get("/", async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    const USER_EXISTS_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
+    await db.get(USER_EXISTS_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.render("user-dashboard/unauthed");
+        return;
+      }
+
+      res.render("user-dashboard/userdash");
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/signup", async (req, res, next) => {
   try {
     res.render("user-dashboard/signup")
   } catch (error) {
@@ -30,7 +64,15 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/signup", async (req, res, next) => {
+router.get("/login", async (req, res, next) => {
+  try {
+    res.render("user-dashboard/login");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/signup", async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -39,7 +81,7 @@ router.post("/signup", async (req, res, next) => {
     }
 
     const LAST_USER_QUERY =
-          "SELECT MayhemId, UserId from UserData ORDER BY UserId DESC LIMIT 1;";
+      "SELECT MayhemId, UserId from UserData ORDER BY UserId DESC LIMIT 1;";
     await db.get(LAST_USER_QUERY, async (error, row) => {
       // Get the last created user, so we can make the new users ids +1
       if (error) {
@@ -59,7 +101,7 @@ router.post("/signup", async (req, res, next) => {
       const newAccessCode = generateToken("AC", newUID.toString());
 
       const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserEmail, UserName, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?, ?, ?)`;
-      await db.get(NEW_USER_QUERY, [newUID, newMID, email, `${email.split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode], async (error, row) => {
+      await db.get(NEW_USER_QUERY, [newUID, newMID, email.toLowerCase(), `${email.toLowerCase().split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode], async (error, row) => {
         if (error) {
           if (error.message.includes('SQLITE_CONSTRAINT: UNIQUE constraint failed: UserData.UserEmail')) {
             res.status(400).send("Email already in use");
@@ -75,6 +117,299 @@ router.post("/signup", async (req, res, next) => {
       });
     });
 
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/login", async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    if (!email) {
+      res.status(400).send("Missing field: email");
+      return;
+    }
+    if (!code) {
+      res.status(400).send("Missing field: code");
+      return;
+    }
+	
+    const USER_BY_EMAIL =
+      "SELECT UserAccessToken, UserCred FROM UserData WHERE UserEmail = ?;";
+    await db.get(USER_BY_EMAIL, [email], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send({ message: "Internal error" });
+        return;
+      }
+
+      if (!row) {
+        res.status(404).send({ message: "No users found with that email" });
+        return;
+      }
+
+      if (row.UserCred != code && config.useSMTP) {
+        res.status(400).send("Invalid code");
+        return;
+      }
+
+      res.cookie("userToken", row.UserAccessToken, {
+        httpOnly: true, // Prevent client-side JS from accessing the cookie
+        sameSite: "Strict",
+        maxAge: 1728000000, // 48 hours
+      });
+
+      res.status(200).send("Logged you in");
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/logout", async (req, res, next) => {
+  try {
+    res.clearCookie("userToken");
+    res.status(200).send("Logged you out");
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+router.post("/api/sendCode", async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).send("Missing field: email");
+      return;
+    }
+
+    const USER_EXISTS_BY_MAIL_QUERY = "SELECT 1 from UserData WHERE UserEmail = ?;";
+    await db.get(USER_EXISTS_BY_MAIL_QUERY, [email], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("Could not find a user with the email");
+        return;
+      }
+
+      if (config.useSMTP) {
+        const transporter = nodemailer.createTransport({
+          host: config.SMTPhost,
+          port: config.SMTPport,
+          secure: config.SMTPsecure,
+          auth: {
+            user: config.SMTPuser,
+            pass: config.SMTPpass,
+          }
+        });
+
+        const newCode = randomInt(10000, 99999);
+        console.log(newCode);
+
+        const mailOptions = {
+          from: config.SMTPuser,
+          to: email,
+          subject: `Verification Code For The Simpsons: Tapped Out - ${newCode}`,
+          text: `Your Code: ${newCode}`
+         };
+
+         const UPDATE_CRED_BY_EMAIL = "UPDATE UserData SET UserCred = ? WHERE UserEmail = ?;";
+         await db.run(UPDATE_CRED_BY_EMAIL, [newCode, email]);
+
+         transporter.sendMail(mailOptions, function(error, info) {
+           if (error) {
+             console.log("Error:", error);
+           }
+         });
+      }
+
+      res.status(200).send("Sendt code");
+
+    });
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/api/getAccountInfo", async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    const USERINFO_BY_TOKEN_QUERY = "SELECT UserName, UserEmail from UserData WHERE UserAccessToken = ?;";
+    await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("No user found with that token")
+        return;
+      }
+
+      res.json({ username: row.UserName, email: row.UserEmail });
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/changeUsername", async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    const { username } = req.body;
+    if (!username) {
+      res.status(400).send("Missing field: username");
+      return;
+    }
+
+    const USERINFO_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
+    await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("No user found with that token")
+        return;
+      }
+
+      const UPDATE_USERNAME_BY_TOKEN = "UPDATE UserData SET UserName = ? WHERE UserAccessToken = ?;"
+      await db.run(UPDATE_USERNAME_BY_TOKEN, [username, token])
+
+      res.status(200).send("Updated username");
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/changeEmail", async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).send("Missing field: email");
+      return;
+    }
+
+    const USERINFO_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
+    await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("No user found with that token")
+        return;
+      }
+
+      const UPDATE_EMAIL_BY_TOKEN = "UPDATE UserData SET UserEmail = ? WHERE UserAccessToken = ?;"
+      await db.run(UPDATE_EMAIL_BY_TOKEN, [email, token])
+
+      res.status(200).send("Updated email");
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/deleteAccount", async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    const USERINFO_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
+    await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("No user found with that token")
+        return;
+      }
+
+      const DELETE_USER_BY_TOKEN = "DELETE FROM UserData WHERE UserAccessToken = ?;"
+      await db.run(DELETE_USER_BY_TOKEN, [token])
+
+      res.status(200).send("Deleted user");
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/api/uploadTown", fileUpload(), async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    if (!req.files?.town) return res.status(400).send("No town uploaded");
+
+    const USERINFO_BY_TOKEN_QUERY = "SELECT LandSavePath from UserData WHERE UserAccessToken = ?;";
+    await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("No user found with that token")
+        return;
+      }
+
+      const town = req.files.town;
+      town.mv(row.LandSavePath, (err) => {
+        if (err) return res.status(500).send(err);
+
+        res.status(200).send("Town uploaded");
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/api/exportTown", fileUpload(), async (req, res, next) => {
+  try {
+    const token = req.cookies.userToken;
+
+    const USERINFO_BY_TOKEN_QUERY = "SELECT LandSavePath from UserData WHERE UserAccessToken = ?;";
+    await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
+      if (error) {
+        console.error("Error executing query:", error.message);
+        res.status(500).send("Internal error");
+        return;
+      }
+
+      if (!row) {
+        res.status(400).send("No user found with that token")
+        return;
+      }
+
+      res.download(row.LandSavePath, (err) => {
+        if (err) {
+          console.error("Download error:", err);
+          res.status(500).send("Error sending file");
+        }
+      });
+
+    });
   } catch (error) {
     next(error);
   }
