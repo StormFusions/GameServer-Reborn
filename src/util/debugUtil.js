@@ -13,7 +13,7 @@ export async function debugWithTime(level, message) {
       console.log(chalk.yellow(`[${currentTime}] ${message}`));
       break;
     case 2:
-      console.log(chalk.red(`[${currentTime}] ${messafe}`));
+      console.log(chalk.red(`[${currentTime}] ${message}`));
       break;
   }
 
