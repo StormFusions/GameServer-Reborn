@@ -325,12 +325,12 @@ router.post("/api/changeEmail", async (req, res, next) => {
       }
 
       if (!row) {
-        res.status(400).send("No user found with that token")
+        res.status(400).send("No user found with that token");
         return;
       }
 
-      const UPDATE_EMAIL_BY_TOKEN = "UPDATE UserData SET UserEmail = ? WHERE UserAccessToken = ?;"
-      await db.run(UPDATE_EMAIL_BY_TOKEN, [email, token])
+      const UPDATE_EMAIL_BY_TOKEN = "UPDATE UserData SET UserEmail = ? WHERE UserAccessToken = ?;";
+      await db.run(UPDATE_EMAIL_BY_TOKEN, [email, token]);
 
       res.status(200).send("Updated email");
     });
@@ -343,7 +343,7 @@ router.post("/api/deleteAccount", async (req, res, next) => {
   try {
     const token = req.cookies.userToken;
 
-    const USERINFO_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
+    const USERINFO_BY_TOKEN_QUERY = "SELECT MayhemId from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
         console.error("Error executing query:", error.message);
@@ -352,12 +352,15 @@ router.post("/api/deleteAccount", async (req, res, next) => {
       }
 
       if (!row) {
-        res.status(400).send("No user found with that token")
+        res.status(400).send("No user found with that token");
         return;
       }
 
-      const DELETE_USER_BY_TOKEN = "DELETE FROM UserData WHERE UserAccessToken = ?;"
-      await db.run(DELETE_USER_BY_TOKEN, [token])
+      const DELETE_USER_BY_TOKEN = "DELETE FROM UserData WHERE UserAccessToken = ?;";
+      await db.run(DELETE_USER_BY_TOKEN, [token]);
+
+      if (!fs.existsSync(config.dataDirectory + "/" + row.MayhemId))
+        fs.rmSync(config.dataDirectory + "/" + row.MayhemId);
 
       res.status(200).send("Deleted user");
     });
@@ -381,7 +384,7 @@ router.post("/api/uploadTown", fileUpload(), async (req, res, next) => {
       }
 
       if (!row) {
-        res.status(400).send("No user found with that token")
+        res.status(400).send("No user found with that token");
         return;
       }
 
