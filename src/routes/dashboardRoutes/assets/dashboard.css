@@ -97,7 +97,8 @@ button:hover {
 }
 
 input,
-button {
+button,
+select {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.8em 1.6em;
@@ -107,6 +108,11 @@ button {
   font-family: inherit;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+::placeholder {
+  color: white;
+  opacity: 1; /* Firefox */
 }
 
 .header {
@@ -239,6 +245,12 @@ button {
   padding: 0;
 }
 
+.top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 .quick-actions {
   display: flex;
   flex-direction: column;
@@ -271,4 +283,59 @@ button {
   display: block;
   white-space: nowrap;
   overflow: visible;
+}
+
+.search-controls {
+  display: flex;
+
+  width: 100%;
+  min-width: 0.01%;
+}
+
+.search-controls input {
+  width: 40%;
+}
+
+.users-table-wrapper {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+
+  max-height: 65vh;
+  min-height: 0.01%;
+  min-width: 0.01%;
+
+  overflow-y: auto;
+  overflow-x: auto;
+
+  background-color: #00000000;
+
+  border-radius: 0.25rem;
+
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+}
+
+.users-table {
+  width: 100%;
+  min-width: 0.01%;
+
+  color: #fff;
+  background-color: #00000000;
+
+  border-collapse: collapse;
+}
+
+.users-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.075);
+}
+
+.users-table th,
+.users-table td {
+  padding: 0.75rem;
+}
+
+.users-table th {
+  border-top-style: solid;
+  border-width: 1%;
+  border-color: #115587;
 }

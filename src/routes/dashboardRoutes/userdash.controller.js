@@ -359,8 +359,8 @@ router.post("/api/deleteAccount", async (req, res, next) => {
       const DELETE_USER_BY_TOKEN = "DELETE FROM UserData WHERE UserAccessToken = ?;";
       await db.run(DELETE_USER_BY_TOKEN, [token]);
 
-      if (!fs.existsSync(config.dataDirectory + "/" + row.MayhemId))
-        fs.rmSync(config.dataDirectory + "/" + row.MayhemId);
+      if (fs.existsSync(config.dataDirectory + "/" + row.MayhemId))
+        fs.rmSync(config.dataDirectory + "/" + row.MayhemId, { recursive: true, force: true });
 
       res.status(200).send("Deleted user");
     });
