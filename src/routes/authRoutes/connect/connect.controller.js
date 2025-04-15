@@ -40,14 +40,14 @@ router.get("/auth", async (req, res, next) => {
           ? Number(row.UserId) + 1
           : config.startingUID + 1; /* If there are no users */
         const newMID = row
-          ? Number(row.MayhemId) + 1
-          : config.startingMID + 1; /* If there are no users */
+          ? BigInt(row.MayhemId) + 1n
+          : BigInt(config.startingMID) + 1n; /* If there are no users */
 
         const newAccessToken = generateToken("AT", newUID.toString());
         const newAccessCode = generateToken("AC", newUID.toString());
 
         const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserEmail, UserName, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?, ?, ?)`;
-        await db.run(NEW_USER_QUERY, [newUID, newMID, req.query.email, req.query.email.split("@")[0], newAccessToken, newAccessCode]);
+        await db.run(NEW_USER_QUERY, [newUID, newMID.toString(), req.query.email, `${email.toLowerCase().split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode]);
 
         const response = {};
         if (response_type.includes("code")) {
@@ -78,14 +78,14 @@ router.get("/auth", async (req, res, next) => {
             ? Number(row.UserId) + 1
             : config.startingUID + 1; /* If there are no users */
           const newMID = row
-            ? Number(row.MayhemId) + 1
-            : config.startingMID + 1; /* If there are no users */
+            ? BigInt(row.MayhemId) + 1n
+            : BigInt(config.startingMID) + 1n; /* If there are no users */
 
           const newAccessToken = generateToken("AT", newUID.toString());
           const newAccessCode = generateToken("AC", newUID.toString());
 
-          const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserAccessToken, UserAccessCode) VALUES (${newUID}, ${newMID}, \"${newAccessToken}\", \"${newAccessCode}\");`;
-          await db.run(NEW_USER_QUERY);
+          const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?)`;
+          await db.run(NEW_USER_QUERY, [newUID, newMID.toString(), newAccessToken, newAccessCode]);
 
           const response = {};
           if (response_type.includes("code")) {
@@ -215,14 +215,14 @@ router.post("/token", async (req, res, next) => {
           ? Number(row.UserId) + 1
           : config.startingUID + 1; /* If there are no users */
         const newMID = row
-          ? Number(row.MayhemId) + 1
-          : config.startingMID + 1; /* If there are no users */
+          ? BigInt(row.MayhemId) + 1n
+          : BigInt(config.startingMID) + 1n; /* If there are no users */
 
         const newAccessToken = generateToken("AT", newUID.toString());
         const newAccessCode = generateToken("AC", newUID.toString());
 
-        const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserAccessToken, UserAccessCode) VALUES (${newUID}, ${newMID}, \"${newAccessToken}\", \"${newAccessCode}\");`;
-        await db.run(NEW_USER_QUERY);
+        const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?)`;
+        await db.run(NEW_USER_QUERY, [newUID, newMID.toString(), newAccessToken, newAccessCode]);
 
         res.status(200).send({
             access_token: newAccessToken,

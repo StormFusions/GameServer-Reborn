@@ -96,14 +96,14 @@ router.post("/api/signup", async (req, res, next) => {
         ? Number(row.UserId) + 1
         : config.startingUID + 1; /* If there are no users */
       const newMID = row
-        ? Number(row.MayhemId) + 1
-        : config.startingMID + 1; /* If there are no users */
+        ? BigInt(row.MayhemId) + 1n
+        : BigInt(config.startingMID) + 1n; /* If there are no users */
 
       const newAccessToken = generateToken("AT", newUID.toString());
       const newAccessCode = generateToken("AC", newUID.toString());
 
       const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserEmail, UserName, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?, ?, ?)`;
-      await db.get(NEW_USER_QUERY, [newUID, newMID, email.toLowerCase(), `${email.toLowerCase().split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode], async (error, row) => {
+      await db.run(NEW_USER_QUERY, [newUID, newMID.toString(), email, `${email.toLowerCase().split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode], async (error, row) => {
         if (error) {
           if (error.message.includes('SQLITE_CONSTRAINT: UNIQUE constraint failed: UserData.UserEmail')) {
             res.status(400).send("Email already in use");

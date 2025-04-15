@@ -45,7 +45,7 @@ app.set("view engine", "pug");
 app.set("views", "./src/views");
 
 const QUERY =
-  "CREATE TABLE IF NOT EXISTS UserData (MayhemId int unique, UserId int unique, UserName text unique, UserEmail text unique, UserCred int, UserAccessToken string unique, UserAccessCode string unique, UserRefreshToken string unique, SessionId string unique, SessionKey string unique, WholeLandToken string, LandSavePath string, CurrencySavePath string);";
+  "CREATE TABLE IF NOT EXISTS UserData (MayhemId text unique, UserId int unique, UserName text unique, UserEmail text unique, UserCred int, UserAccessToken string unique, UserAccessCode string unique, UserRefreshToken string unique, SessionId string unique, SessionKey string unique, WholeLandToken string, LandSavePath string, CurrencySavePath string);";
 db.run(QUERY, async (error) => {
   // Make sure database is initialized
   if (error) {
