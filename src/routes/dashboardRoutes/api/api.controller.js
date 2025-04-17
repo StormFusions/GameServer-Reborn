@@ -210,6 +210,11 @@ router.post("/users/delete", async (req, res, next) => {
 
 router.post("/savefiles/setDonuts", async (req, res, next) => {
   try {
+    const UPDATE_QUERY = `
+      UPDATE UserData
+      SET CurrencySavePath = ?
+      WHERE MayhemId = ?`;
+
     const key = req.cookies.adminKey;
     if (key && key === config.adminKey) {
       if (!req.body.donuts) return res.status(400).send("Amount of donuts not specified");
