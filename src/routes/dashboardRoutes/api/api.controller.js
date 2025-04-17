@@ -248,6 +248,9 @@ router.post("/savefiles/setDonuts", async (req, res, next) => {
           });
         }
 
+        if (!fs.existsSync(config.dataDirectory + "/" + mayhemId))
+          fs.mkdirSync(config.dataDirectory + "/" + mayhemId);
+
         let message = CurrencyData.create({
           id: mayhemId,
           vcTotalPurchased: 0,
