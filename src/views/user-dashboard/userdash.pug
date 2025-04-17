@@ -24,11 +24,11 @@ html(lang="en")
         .box
           h3 Town Operations
           .row
-            form#town-form(enctype="multipart/form-data")
+            form#user-town-form(enctype="multipart/form-data")
               input#town-input(type="file", name="town", accept=".pb, .land", required="true")
               button(type="submit") Upload
           .row
-            button(onClick="API.downloadFile()") Export Town
+            button(onClick="API.usersDownloadFile()") Export Town
 
         .box
           h3 Friends

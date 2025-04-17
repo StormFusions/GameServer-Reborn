@@ -296,7 +296,7 @@ select {
   width: 40%;
 }
 
-.users-table-wrapper {
+.table-wrapper {
   display: flex;
   flex-grow: 1;
   width: 100%;
@@ -315,7 +315,7 @@ select {
   box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
 }
 
-.users-table {
+.table {
   width: 100%;
   min-width: 0.01%;
 
@@ -325,16 +325,16 @@ select {
   border-collapse: collapse;
 }
 
-.users-table tbody tr:hover {
+.table tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.075);
 }
 
-.users-table th,
-.users-table td {
+.table th,
+.table td {
   padding: 0.75rem;
 }
 
-.users-table th {
+.table th {
   border-top-style: solid;
   border-width: 1%;
   border-color: #115587;

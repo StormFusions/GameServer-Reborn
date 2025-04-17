@@ -54,6 +54,19 @@ router.get("/users", async (req, res, next) => {
   }
 });
 
+router.get("/savefiles", async (req, res, next) => {
+  try {
+    const key = req.cookies.adminKey;
+    if (key && key === config.adminKey) {
+      res.render("admin-dashboard/dashboard-savefiles");
+    } else {
+      res.render("admin-dashboard/login");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 router.post("/login", async (req, res, next) => {
   try {

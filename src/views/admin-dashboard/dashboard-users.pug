@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
   head
-    title="Dashboard | General"
+    title="Dashboard | Users"
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/dashboard.css")
   body
@@ -15,7 +15,7 @@ html(lang="en")
           li.navbar-item
             a(href="/dashboard/users") Users
           li.navbar-item
-            a Savefiles
+            a(href="/dashboard/savefiles") Savefiles
           li.navbar-item
             a Configuration
 
@@ -37,8 +37,8 @@ html(lang="en")
 
             input#searchInput(type="text", onchange="API.usersSearch()", placeholder="Search by Username, Email, Mayhem ID or User ID...")
             button(onclick="API.usersSearch()") Search
-          .users-table-wrapper#users-table(style="max-height: 65vh; overflow-y: auto;")
-            table.users-table
+          .table-wrapper#users-table(style="max-height: 65vh; overflow-y: auto;")
+            table.table
               thead
                 tr
                   th Username

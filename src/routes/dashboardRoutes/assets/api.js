@@ -15,14 +15,20 @@ class Api {
       this.usersPagesize = 10;
       this.usersCurrentQuery = "";
       this.loadUsers();
+
+      this.savefilesCurrentPage = 1;
+      this.lastSavefileResponseCount = 0;
+      this.savefilesPagesize = 10;
+      this.savefilesCurrentQuery = "";
+      this.loadSavefiles();
     } catch (error) {
       console.error("Error initializing dashboard:", error);
     }
   }
 
   setupEventListeners() {
-    if (document.getElementById("town-form")) {
-      document.getElementById("town-form").addEventListener("submit", async (e) => {
+    if (document.getElementById("user-town-form")) {
+      document.getElementById("user-town-form").addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const formData = new FormData();
@@ -37,7 +43,7 @@ class Api {
     }
   }
 
-  async downloadFile() {
+  async usersDownloadFile() {
     const link = document.createElement('a');
     link.href = "/userdash/api/exportTown";
     //link.download = filename;
@@ -266,11 +272,11 @@ class Api {
               >
             </th>
             <th>
-              <button style="background-color: red;" onclick="API.adminAreYouSure(this, ${user.MayhemId})">Delete Account</button>
+              <button style="background-color: red;" onclick="API.adminAreYouSure(this, '${user.MayhemId}')">Delete Account</button>
             </th>
           `;
           tbody.appendChild(row);
-      });
+        });
       });
     } catch (error) {
       console.error(error);
@@ -360,7 +366,7 @@ class Api {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ mayhemId })
+        body: JSON.stringify({ mayhemId: mayhemId.toString() })
       })
       .then(async response => {
         if (response.ok) {
@@ -368,6 +374,172 @@ class Api {
         }
       });
 
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async loadSavefiles() {
+    if (!document.getElementById("savefiles-table")) {
+      return;
+    }
+
+    try {
+      await fetch("/dashboard/api/savefiles/get", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ page: this.savefilesCurrentPage, pageSize: this.savefilesPagesize, query: this.savefilesCurrentQuery }),
+      })
+      .then(response => response.json())
+      .then(async response => {
+        this.lastSavefileResponseCount = response.data.length;
+
+        if (this.lastSavefileResponseCount === 0 && this.savefilesCurrentPage > 1) { // If the page is empty
+          this.savefilesCurrentPage -= 1;
+          return this.loadSavefiles();
+        }
+
+        const tbody = document.getElementById('savefiles-table-body');
+        tbody.innerHTML = "";
+
+        response.data.forEach(user => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <th>
+              <input
+                style="background-color: transparent; margin: 0; padding: 0; border: none; box-shadow: none; text-align: center;"
+                value="${user.UserName == null ? "Anonymous" : user.UserName}"
+                data-field="UserName"
+                data-mayhem-id="${user.MayhemId}"
+                onchange="API.usersHandleInputChange(this)"
+              >
+            </th>
+            <th>
+              <input
+                style="background-color: transparent; margin: 0; padding: 0; border: none; box-shadow: none; text-align: center;"
+                value="${user.UserEmail == null ? "Anonymous" : user.UserEmail}"
+                data-field="UserEmail"
+                data-mayhem-id="${user.MayhemId}"
+                onchange="API.usersHandleInputChange(this)"
+              >
+            </th>
+            <th>
+              <div>
+                <input value="${user.DonutCount}">
+                <button onclick="API.adminSetDonuts(this, '${user.MayhemId}')">Set Donuts</button>
+              </div>
+
+              <form class="admin-town-form" enctype="multipart/form-data">
+                <input type="hidden" name="mayhemId" value="${user.MayhemId}">
+                <input class="town-input" type="file" name="town" accept=".pb,.land" required data-mayhem-id="${user.MayhemId}">
+                <button type="submit">Upload</button>
+              </form>
+              <button onclick="API.adminExportTown('${user.MayhemId}')">Export Save</button>
+              <button style="background-color: red;" onclick="API.adminDeleteTown(this, '${user.MayhemId}')">Delete Save</button>
+            </th>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+
+      [...document.getElementsByClassName("admin-town-form")].forEach(form => {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+          const townInput = form.querySelector(".town-input");
+
+          const response = await fetch('/dashboard/api/savefiles/upload', {
+            method: 'POST',
+            body: formData
+          });
+        });
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async savefilesChangePageSize() {
+    try {
+      this.savefilesPagesize = parseInt(document.getElementById("pageSize").value)
+      await this.loadSavefiles();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async savefilesPreviousPage() {
+    try {
+      if (this.savefilesCurrentPage <= 1) return; // First page
+
+      this.savefilesCurrentPage -= 1;
+      await this.loadSavefiles();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async savefilesNextPage() {
+    try {
+      if (this.lastUserResponseCount === 0) return; // Don't go to empty pages
+
+      this.savefilesCurrentPage += 1;
+      await this.loadSavefiles();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async savefilesSearch() {
+    try {
+      this.savefilesCurrentPage = 1;
+      this.savefilesCurrentQuery = document.getElementById("searchInput").value;
+
+      await this.loadSavefiles();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async adminSetDonuts(button, mayhemId) {
+    try {
+      const container = button.closest("div");
+
+      const input = container?.querySelector("input");
+      const donutsValue = input?.value?.trim();
+
+      fetch("/dashboard/api/savefiles/setDonuts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ mayhemId, donuts: donutsValue })
+      });
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async adminExportTown(mayhemId) {
+    const link = document.createElement('a');
+    link.href = `/dashboard/api/savefiles/export?mayhemId=${mayhemId}`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  async adminDeleteTown(button, mayhemId) {
+    try {
+      await fetch(`/dashboard/api/savefiles/delete?mayhemId=${mayhemId}`, {
+        method: "POST"
+      }).then(async response => {
+        button.innerHTML = await response.text();
+      });
     } catch (error) {
       console.error(error);
     }
@@ -464,7 +636,7 @@ class Api {
     } catch (error) {
       console.error(error);
     }
-  } 
+  }
 
   async startServer() {
     try {

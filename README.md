@@ -56,7 +56,7 @@ npm start
 
 ## Using the Dashboard(s)
 
-- On the admin dashboard you can configure server settings and the current event. A user manager and town manager is planned.
+- On the admin dashboard you can configure server settings and the current event, manage users and manage towns. A server configurator is planned.
 
 - On the user dashboard you can make an email account, login and change your username and email, and import and export your town. Adding friends is a planned for the user dashboard.
 
