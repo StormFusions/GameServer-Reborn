@@ -47,7 +47,7 @@ router.get("/auth", async (req, res, next) => {
         const newAccessCode = generateToken("AC", newUID.toString());
 
         const NEW_USER_QUERY = `INSERT INTO UserData (UserId, MayhemId, UserEmail, UserName, UserAccessToken, UserAccessCode) VALUES (?, ?, ?, ?, ?, ?)`;
-        await db.run(NEW_USER_QUERY, [newUID, newMID.toString(), req.query.email, `${email.toLowerCase().split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode]);
+        await db.run(NEW_USER_QUERY, [newUID, newMID.toString(), req.query.email, `${req.query.email.toLowerCase().split("@")[0]}_${randomBytes(2).toString("hex").slice(0, 4)}`, newAccessToken, newAccessCode]);
 
         const response = {};
         if (response_type.includes("code")) {
