@@ -112,12 +112,12 @@ router.post(
             .status(400)
             .send(
               `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="400" type="BAD_REQUEST" field="Invalid AcessToken for specified MayhemId"/>`,
+					<error code="400" type="BAD_REQUEST" field="Invalid AccessToken for specified MayhemId"/>`,
             );
           return;
         }
 
-        if (!userData.WholeLandToken && (!force || force != "1")) {
+        /*if (!userData.WholeLandToken && (!force || force != "1")) {
           res
             .type("application/xml")
             .status(200)
@@ -126,7 +126,7 @@ router.post(
 					<error code="409" type="RESOURCE_ALREADY_EXISTS"/>`,
             );
           return;
-        }
+        }*/ // Causes "Your other device didn't save" to appear every time, so removed
 
         const newWholeLandToken = uuidv4();
         db.run(

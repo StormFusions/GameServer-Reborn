@@ -442,7 +442,7 @@ router.get("/api/exportTown", fileUpload(), async (req, res, next) => {
       res.download(row.LandSavePath, (err) => {
         if (err) {
           console.error("Download error:", err);
-          res.status(500).send("Error sending file");
+          // res.status(500).send("Error sending file"); Makes the server crash
         }
       });
 
