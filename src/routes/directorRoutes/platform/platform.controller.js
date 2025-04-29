@@ -54,7 +54,7 @@ router.get("/:platform/getDirectionByBundle", async (req, res, next) => {
   // iOS
   try {
     const bundleId = req.query.bundleId;
-    if (!packageId) {
+    if (!bundleId) {
       res.status(400).send("Error 400: No bundleId");
       return;
     }
