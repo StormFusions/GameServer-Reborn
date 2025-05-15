@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import sqlite3 from "sqlite3";
+import { randomBytes } from "crypto";
 
 import config from "../../../../config.json" with { type: "json" };
 
