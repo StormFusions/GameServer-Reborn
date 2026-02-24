@@ -1,11 +1,18 @@
 # GameServer-Reborn
 Multi-User Private Server for The Simpsons™: Tapped Out Mobile Game
 
+## Features
+- Working friend system and is synced with the user dashboard (/userdash)
+- Backup system that takes a back up of /data folder, it takes a copy of the database and people lands
+- Works well with custom DLC's like [Project Springfield](https://github.com/Project-Springfield/Project-Springfield-DLC) custom DLC that fixes a lot of bugs and brings new content
+
+I would like to thank Project Springfield team specially Dractiums for the help with these features. Also I had help from AI modules to make this happen, this is my first major project outside my usual knowledge and was mostly a learning opertunity for myself and to make the game I once played workable again. 
+
 ## Getting Started
 
 ### Prerequisites
 
-To run this server, you'll need [Node.js](https://nodejs.org/) installed. You can download and install it by following the instructions on the official website. Additionally, you will need a patched APK, which the instructions for can be found at [TappedOutReborn/Patch-APK](https://github.com/TappedOutReborn/Patch-APK).
+To run this server, you'll need [Node.js](https://nodejs.org/) installed. You can download and install it by following the instructions on the official website. Additionally, you will need a patched APK, which the instructions for can be found at [Tsto_patcher](https://github.com/al1sant0s/Tsto_patcher).
 
 ### Installation
 
