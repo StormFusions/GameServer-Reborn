@@ -22,7 +22,7 @@ Follow these steps to set up the server:
 
    Start by cloning the project to your local machine:
    ```sh
-   git clone https://github.com/TappedOutReborn/GameServer-Reborn.git
+   git clone https://github.com/StormFusions/GameServer-Reborn.git
    ```
 
 2. **Install Dependencies**
