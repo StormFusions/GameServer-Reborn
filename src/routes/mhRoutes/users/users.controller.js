@@ -1,105 +1,72 @@
 import { Router } from "express";
 
-import protobuf from "protobufjs";
+import pb from "../../../lib/protobuf.js";
 
-import sqlite3 from "sqlite3";
+import { dbGet } from "../../../lib/db.js";
+import { logger } from "../../../lib/logger.js";
 
 import config from "../../../../config.json" with { type: "json" };
 
-const db = new sqlite3.Database(
-  config.dataDirectory + "/users.db",
-  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-  (error) => {
-    if (error) {
-      console.error(
-        "[users.controller.js] Error opening database:",
-        error.message,
-      );
-      return;
-    }
-  },
-);
-
 const router = Router();
 
-const QUERY = `
-        SELECT MayhemId, UserAccessToken, SessionId, SessionKey
-        FROM UserData
-        WHERE UserId = ?`;
+// Helper: Get token from request headers
+const getTokenFromHeaders = (req) => {
+  return req.headers["nucleus_token"] || req.headers["mh_auth_params"];
+};
+
+// Helper: Send XML error response
+const sendXmlError = (res, code, type, field = "") => {
+  const fieldAttr = field ? ` field="${field}"` : "";
+  res.type("application/xml").status(code).send(
+    `<?xml version="1.0" encoding="UTF-8"?><error code="${code}" type="${type}"${fieldAttr}/>`
+  );
+};
+
+// Queries
+const USER_BY_ID_QUERY = `SELECT MayhemId, UserAccessToken, SessionId, SessionKey FROM UserData WHERE UserId = ?`;
+const USER_BY_TOKEN_QUERY = `SELECT MayhemId FROM UserData WHERE UserAccessToken = ?`;
 
 router.put("/", async (req, res, next) => {
   try {
     const applicationUserId = req.query.applicationUserId;
+    const reqToken = getTokenFromHeaders(req);
 
-    const reqToken =
-      req.headers["nucleus_token"] || req.headers["mh_auth_params"];
-    if (!reqToken) {
-      res
-        .type("application/xml")
-        .status(400)
-        .send(
-          `<?xml version="1.0" encoding="UTF-8"?>
-			<error code="400" type="MISSING_VALUE" field="nucleus_token"/>`,
-        );
+    if (!applicationUserId) {
+      sendXmlError(res, 400, "MISSING_VALUE", "applicationUserId");
       return;
     }
 
-    const mh_uid = req.headers["mh_uid"];
+    if (!reqToken) {
+      sendXmlError(res, 400, "MISSING_VALUE", "nucleus_token");
+      return;
+    }
 
-    await db.get(QUERY, [applicationUserId], async (error, row) => {
-      if (error) {
-        console.error("Error executing query:", error.message);
-        res
-          .type("application/xml")
-          .status(500)
-          .send(
-            `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="500" type="INTERNAL_SERVER_ERROR"/>`,
-          );
-        return;
-      }
+    const row = await dbGet(USER_BY_ID_QUERY, [applicationUserId]);
 
-      if (!row) {
-        res
-          .type("application/xml")
-          .status(404)
-          .send(
-            `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="404" type="NOT_FOUND" field="applicationUserId"/>`,
-          );
-        return;
-      }
+    if (!row) {
+      sendXmlError(res, 404, "NOT_FOUND", "applicationUserId");
+      return;
+    }
 
-      let userData = row;
+    if (reqToken !== row.UserAccessToken) {
+      sendXmlError(res, 400, "BAD_REQUEST", "AccessToken and UserId does not match");
+      return;
+    }
 
-      if (!reqToken == userData.UserAccessToken) {
-        res
-          .type("application/xml")
-          .status(400)
-          .send(
-            `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="400" type="BAD_REQUEST" field="AccessToken and UserId does not match"/>`,
-          );
-        return;
-      }
+    const UsersResponseMessage = pb.lookupType("Data.UsersResponseMessage");
+    const MayhemId = row.MayhemId.toString();
+    const SessionKey = "";
 
-      const root = await protobuf.load("TappedOut.proto");
-      const UsersResponseMessage = root.lookupType("Data.UsersResponseMessage");
-
-      const MayhemId = userData.MayhemId.toString();
-      const SessionKey = ""; // userData.SessionKey.toString();
-
-      let message = UsersResponseMessage.create({
-        user: {
-          userId: MayhemId,
-          telemetryId: "42" /* Not used, but client excpects it */,
-        },
-        token: { sessionKey: SessionKey },
-      });
-
-      res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
-      res.send(UsersResponseMessage.encode(message).finish());
+    let message = UsersResponseMessage.create({
+      user: {
+        userId: MayhemId,
+        telemetryId: "42",
+      },
+      token: { sessionKey: SessionKey },
     });
+
+    res.type("application/x-protobuf");
+    res.send(UsersResponseMessage.encode(message).finish());
   } catch (error) {
     next(error);
   }
@@ -107,51 +74,29 @@ router.put("/", async (req, res, next) => {
 
 router.get("/", async (req, res, next) => {
   try {
-    const reqToken =
-      req.headers["nucleus_token"] || req.headers["mh_auth_params"];
+    const reqToken = getTokenFromHeaders(req);
+
     if (!reqToken) {
-      res
-        .type("application/xml")
-        .status(400)
-        .send(
-          `<?xml version="1.0" encoding="UTF-8"?>
-			<error code="400" type="MISSING_VALUE" field="nucleus_token"/>`,
-        );
+      sendXmlError(res, 400, "MISSING_VALUE", "nucleus_token");
       return;
     }
 
-    const MAYHEMID_BY_TOKEN = "SELECT MayhemId FROM UserData WHERE UserAccessToken = ?"
-    await db.get(MAYHEMID_BY_TOKEN, [reqToken], async (error, row) => {
-      if (error) {
-        console.error("Error executing query:", error.message);
-        res
-          .type("application/xml")
-          .status(500)
-          .send(
-            `<?xml version="1.0" encoding="UTF-8"?>
-					<error code="500" type="INTERNAL_SERVER_ERROR"/>`,
-          );
-        return;
-      }
+    const row = await dbGet(USER_BY_TOKEN_QUERY, [reqToken]);
 
-      if (!row) {
-        res
-          .status(404)
-          .send("Could not find a user with that token");
-        return;
-      }
+    if (!row) {
+      res.status(404).send("Could not find a user with that token");
+      return;
+    }
 
-      res
-        .type("application/xml")
-        .status(500)
-        .send(
-          `<?xml version="1.0" encoding="UTF-8"?>
+    res
+      .type("application/xml")
+      .status(200)
+      .send(
+        `<?xml version="1.0" encoding="UTF-8"?>
         <Resources>
           <URI>/users/${row.MayhemId}</URI>
-        </Resources>`,
-        );
-
-    });
+        </Resources>`
+      );
   } catch (error) {
     next(error);
   }

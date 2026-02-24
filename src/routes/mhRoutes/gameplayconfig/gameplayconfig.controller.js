@@ -1,23 +1,21 @@
 import { Router } from "express";
 
-import protobuf from "protobufjs";
-import fs from "fs";
+import pb from "../../../lib/protobuf.js";
+import fileCache from "../../../lib/fileCache.js";
+import path from "path";
 
 const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const root = await protobuf.load("TappedOut.proto");
-    const GameplayConfigResponse = root.lookupType(
-      "Data.GameplayConfigResponse",
-    );
+    const GameplayConfigResponse = pb.lookupType("Data.GameplayConfigResponse");
 
-    const gameplayConfigJSON = JSON.parse(
-      fs.readFileSync("configs/GameplayConfig.json"),
-    );
+    const gameplayConfigJSON = await fileCache.getJson(path.resolve("configs/GameplayConfig.json"));
     let message = GameplayConfigResponse.create(gameplayConfigJSON);
 
-    res.type("application/x-protobuf"); // Make sure the client knows it's protobuf
+    // Cache for 1 hour since config changes infrequently
+    res.set("Cache-Control", "public, max-age=3600");
+    res.type("application/x-protobuf");
     res.send(GameplayConfigResponse.encode(message).finish());
   } catch (error) {
     next(error);

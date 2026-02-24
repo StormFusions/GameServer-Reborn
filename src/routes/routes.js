@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import gamesController from "./mhRoutes/games/games.controller.js";
+import gamesController from "./mhRoutes/games/game.index.js";
 import gameplayconfigController from "./mhRoutes/gameplayconfig/gameplayconfig.controller.js";
 import usersController from "./mhRoutes/users/users.controller.js";
 import userstatsController from "./mhRoutes/userstats/userstats.controller.js";
@@ -15,6 +15,9 @@ import probeController from "./authRoutes/probe/probe.controller.js";
 import connectController from "./authRoutes/connect/connect.controller.js";
 
 import identityController from "./proxyRoutes/identity/identity.controller.js";
+
+import friendsController from "./mhRoutes/games/friends.controller.js";
+import invitationsController from "./mhRoutes/games/invitations.controller.js";
 
 import trackingApiController from "./trackingRoutes/api/api.controller.js";
 
@@ -51,6 +54,10 @@ const apiAuth = Router()
 
 const apiProxy = Router().use("/identity", identityController);
 
+const apiFriends = Router().use("/", friendsController);
+
+const apiInvitations = Router().use("/", invitationsController);
+
 const apiTrackingApi = Router().use("/", trackingApiController);
 
 export default Router()
@@ -60,6 +67,10 @@ export default Router()
   .use("/user/api", apiUser)
   .use("/", apiAuth)
   .use("/proxy", apiProxy)
+  .use("/friends", apiFriends)  // Mount both friends & invitations at /friends
+  .use("/friends", apiInvitations)
+  .use("/2/users", apiFriends)  // And at /2/users for game calls
+  .use("/2/users", apiInvitations)
   .use(
     "//proxy",
     apiProxy,

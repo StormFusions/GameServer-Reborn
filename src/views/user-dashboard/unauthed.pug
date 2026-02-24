@@ -1,16 +1,158 @@
 doctype html
 html(lang="en")
   head
-    title="Userdash"
+    title="User Dashboard"
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/userdash.css")
+    style.
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--dark) 0%, #1a1a1a 100%);
+        padding: 1rem;
+      }
+      
+      .unauthed-container {
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+      }
+      
+      .unauthed-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
+      }
+      
+      .unauthed-card h1 {
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+      }
+      
+      .unauthed-card .subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+      }
+      
+      .auth-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      
+      .btn-auth {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .btn-auth:hover {
+        background: #0d4570;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(17, 85, 135, 0.3);
+      }
+      
+      .btn-auth:active {
+        transform: translateY(0);
+      }
+      
+      .btn-auth.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .btn-auth.secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+      
+      footer {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin-top: auto;
+      }
+
+      .stats-info {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-top: 2rem;
+      }
+
+      .current-users {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+      
+      @media (max-width: 480px) {
+        .unauthed-card {
+          padding: 2rem 1.5rem;
+        }
+        
+        .unauthed-card h1 {
+          font-size: 1.5rem;
+        }
+        
+        .auth-buttons {
+          grid-template-columns: 1fr;
+        }
+      }
+  
   body
-    .container
-      .content
-        button(onclick="window.location=\"/userdash/login\";", style="width: 100%;") Login
-        button(onclick="window.location=\"/userdash/signup\";", style="width: 100%;") Sign Up
-
+    .unauthed-container
+      .unauthed-card
+        h1 Welcome!
+        p.subtitle Please sign in or create an account to continue
+        
+        .auth-buttons
+          button.btn-auth(type="button", onclick="window.location='/userdash/login'") Login
+          button.btn-auth.secondary(type="button", onclick="window.location='/userdash/signup'") Sign Up
+      
+      .stats-info
+        label.current-users Current Players: Loading...
+    
     footer
-      label We are not affiliated with The Walt Disney Company and/or EA.
+      p We are not affiliated with The Walt Disney Company and/or EA.
 
-  script(src="/dashboard/assets/api.js")
+  script.
+    async function updatePlayerCount() {
+      try {
+        const element = document.querySelector('.current-users');
+        if (!element) return;
+        
+        const response = await fetch('/dashboard/api/players/count');
+        const data = await response.json();
+        
+        if (data.success && data.data !== undefined) {
+          element.textContent = `Current Players: ${data.data}`;
+        }
+      } catch (error) {
+        console.error("Error fetching player count:", error);
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      updatePlayerCount();
+      setInterval(updatePlayerCount, 5000);
+    });

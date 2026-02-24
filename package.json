@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
+    "prestart": "node setup.js",
     "start": "node src/index.js"
   },
   "author": "",
@@ -10,20 +11,26 @@
   "description": "",
   "type": "module",
   "dependencies": {
+    "archiver": "^7.0.1",
     "chalk": "^5.4.1",
     "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "express-fileupload": "^1.5.1",
+    "extract-zip": "^2.0.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",
+    "pino": "^8.16.0",
+    "pino-http": "^8.0.0",
+    "prom-client": "^15.0.0",
     "protobufjs": "^7.4.0",
     "pug": "^3.0.3",
     "sqlite3": "^5.1.7",
     "uuid": "^11.0.3"
   },
   "devDependencies": {
+    "pino-pretty": "10.1.0",
     "prettier": "3.4.2"
   }
 }

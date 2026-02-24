@@ -5,46 +5,102 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/dashboard.css")
   body
-    .container
-      nav.header
-        ul.navbar
-          li.navbar-item
-            a(href="/dashboard") General
-          li.navbar-item
-            a(href="/dashboard/event") Event
-          li.navbar-item
-            a(href="/dashboard/users") Users
-          li.navbar-item
-            a(href="/dashboard/savefiles") Savefiles
-          li.navbar-item
-            a Configuration
+    button.menu-toggle(onclick="toggleSidebar()")
+      svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="24" height="24" fill="currentColor")
+        path(d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z")
+    
+    nav.sidebar
+      .sidebar-header
+        h1 Server Admin
+      
+      ul.navbar
+        li.navbar-item
+          a(href="/dashboard", title="General")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z")
+            span General
+        li.navbar-item
+          a(href="/dashboard/event", title="Event")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z")
+            span Event
+        li.navbar-item
+          a(href="/dashboard/users", title="Users")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.64 2.42 1.71 2.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z")
+            span Users
+        li.navbar-item
+          a(href="/dashboard/players", title="Players")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z")
+            span Players
+        li.navbar-item
+          a(href="/dashboard/savefiles", title="Savefiles")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2z M11 2H7c-1.1 0-2 .9-2 2v3h2V4h4v3h2V4c0-1.1-.9-2-2-2zm6 7h-4v3H7v-3H3v2h2v7h12v-7h2v-2z")
+            span Savefiles
+        li.navbar-item
+          a(href="/dashboard/backups", title="Backups")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z")
+            span Backups
+        li.navbar-item
+          a(href="/dashboard/config", title="Configuration")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.64l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.07.5.12.64l2.03 1.58c-.05.3-.07.62-.07.94 0 .32.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.64l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.5-.12-.64l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z")
+            span Config
+        li.navbar-item
+          a(href="/dashboard/logs", title="Logs")
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+              path(d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-8-6z M16 18H8v-2h8v2z M16 14H8v-2h8v2z M14 9H8V7h6v2z")
+            span Logs
+      
+      button.logout-button(onclick="API.adminLogout()", title="Logout")
+        svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 512 512" width="20" height="20" fill="currentColor")
+          path(d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z")
+        span Logout
 
-        button.logout-button(onclick="API.adminLogout()")
-          svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 512 512" width="25" height="25")
-            path(fill="white", d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z")
-
-      .wrapper
-        .content.top
-          .search-controls
+    main.content-container
+      .content-wrapper
+        h2 User Savefiles
+        
+        .search-controls
+          .control-group
             select#pageSize(onchange="API.savefilesChangePageSize()")
               option(value="10") 10 per page
               option(value="25") 25 per page
               option(value="50") 50 per page
               option(value="100") 100 per page
-
-            button(onclick="API.savefilesPreviousPage()") Previous
-            button(onclick="API.savefilesNextPage()") Next
-
+            
             input#searchInput(type="text", onchange="API.savefilesSearch()", placeholder="Search by Username, Email, Mayhem ID or User ID...")
-            button(onclick="API.savefilesSearch()") Search
-          .table-wrapper#savefiles-table(style="max-height: 65vh; overflow-y: auto;")
-            table.table
-              thead
-                tr
-                  th Username
-                  th Email
-                  th Actions
-              tbody#savefiles-table-body
-                // Data will be put here
+            button.btn-primary(onclick="API.savefilesSearch()") Search
+          
+          .pagination-controls
+            button.btn-secondary(onclick="API.savefilesPreviousPage()") Previous
+            button.btn-secondary(onclick="API.savefilesNextPage()") Next
+        
+        .table-wrapper#savefiles-table(style="max-height: 65vh; overflow-y: auto;")
+          table.table
+            thead
+              tr
+                th Username
+                th Email
+                th Actions
+            tbody#savefiles-table-body
+              // Data will be put here
 
+    script.
+      function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('active');
+      }
+      
+      window.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const toggle = document.querySelector('.menu-toggle');
+        if (!event.target.closest('.sidebar') && !event.target.closest('.menu-toggle')) {
+          sidebar.classList.remove('active');
+        }
+      });
+    
     script(src="/dashboard/assets/api.js")

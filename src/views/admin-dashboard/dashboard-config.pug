@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
   head
-    title="Dashboard | Event"
+    title="Dashboard | Configuration"
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/dashboard.css")
   body
@@ -62,34 +62,115 @@ html(lang="en")
 
     main.content-container
       .content-wrapper
-        h2 Current Event
-        .actions-section
-          .stat-card
-            .stat-icon
-              svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="32" height="32" fill="currentColor")
-                path(d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z")
-            .stat-content
-              .stat-label Current Event
-              .stat-value#event-div Loading...
-          
-          .stat-card
-            .stat-icon
-              svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="32" height="32" fill="currentColor")
-                path(d="M11.99 5V1h-8v4H1v14h22V5h-11zm7 10h-6v6h-2v-6H5v-2h6V7h2v6h6v2z")
-            .stat-content
-              .stat-label Game Time
-              .stat-value#game-time-div Loading...
+        h2 Server Configuration
         
-        h2 Change Event
-        .actions-section
-          .form-row
-            label(for="lobbytime") Select Event
-            form#event-form
-              select(id="lobbytime", name="lobbytime" class="selectpicker")
-                option(value="0" data-subtext="Now") Now
+        form#config-form
+          .form-section
+            h3 Core Settings
+            .form-row
+              .form-group
+                label(for="cfg-verbose") Verbose Logging:
+                input(type="checkbox" id="cfg-verbose")
+              .form-group
+                label(for="cfg-ip") IP Address:
+                input(type="text" id="cfg-ip" placeholder="0.0.0.0")
+              .form-group
+                label(for="cfg-listenPort") Listen Port:
+                input(type="number" id="cfg-listenPort" min="1" max="65535")
           
-          .form-row
-            button.btn.btn-primary(type="submit" form="event-form") Change Event
+          .form-section
+            h3 Starting Values
+            .form-row
+              .form-group
+                label(for="cfg-startingDonuts") Starting Donuts:
+                input(type="number" id="cfg-startingDonuts")
+              .form-group
+                label(for="cfg-startingUID") Starting UID:
+                input(type="text" id="cfg-startingUID")
+              .form-group
+                label(for="cfg-startingMID") Starting MID:
+                input(type="text" id="cfg-startingMID")
+          
+          .form-section
+            h3 Data Paths
+            .form-row
+              .form-group
+                label(for="cfg-dataDirectory") Data Directory:
+                input(type="text" id="cfg-dataDirectory")
+              .form-group
+                label(for="cfg-localDlcFolder") Local DLC Folder:
+                input(type="text" id="cfg-localDlcFolder")
+          
+          .form-section
+            h3 Security
+            .form-row
+              .form-group
+                label(for="cfg-adminKey") Admin Key (read-only):
+                input(type="password" id="cfg-adminKey")
+                button(type="button" id="cfg-toggle-admin-pass" onclick="API.toggleVisibility('cfg-adminKey','cfg-toggle-admin-pass')") Show
+          
+          .form-section
+            h3 TSTO API Configuration
+            .form-row
+              .form-group
+                label(for="cfg-useTSTO_API") Use TSTO API:
+                input(type="checkbox" id="cfg-useTSTO_API")
+              .form-group
+                label(for="cfg-TSTO_APIkey") TSTO API Key:
+                input(type="text" id="cfg-TSTO_APIkey")
+              .form-group
+                label(for="cfg-TSTO_APIteam") TSTO API Team:
+                input(type="text" id="cfg-TSTO_APIteam")
+          
+          .form-section
+            h3 SMTP Configuration
+            .form-row
+              .form-group
+                label(for="cfg-useSMTP") Use SMTP:
+                input(type="checkbox" id="cfg-useSMTP")
+              .form-group
+                label(for="cfg-SMTPhost") SMTP Host:
+                input(type="text" id="cfg-SMTPhost")
+              .form-group
+                label(for="cfg-SMTPport") SMTP Port:
+                input(type="number" id="cfg-SMTPport")
+            .form-row
+              .form-group
+                label(for="cfg-SMTPsecure") SMTP Secure:
+                input(type="checkbox" id="cfg-SMTPsecure")
+              .form-group
+                label(for="cfg-SMTPuser") SMTP User:
+                input(type="text" id="cfg-SMTPuser")
+              .form-group
+                label(for="cfg-SMTPpass") SMTP Pass:
+                input(type="password" id="cfg-SMTPpass")
+                button(type="button" id="cfg-toggle-smtp-pass" onclick="API.toggleVisibility('cfg-SMTPpass','cfg-toggle-smtp-pass')") Show
+          
+          .form-section
+            h3 DLC Configuration
+            .form-row
+              .form-group
+                label(for="cfg-serveDlcsLocally") Serve DLCs Locally:
+                input(type="checkbox" id="cfg-serveDlcsLocally")
+          
+          .form-section
+            h3 Backup Configuration
+            .form-row
+              .form-group
+                label(for="cfg-backupDirectory") Backup Directory:
+                input(type="text" id="cfg-backupDirectory")
+              .form-group
+                label(for="cfg-backupInterval") Backup Interval (milliseconds):
+                input(type="number" id="cfg-backupInterval" min="60000")
+                small 60000 = 1 min, 3600000 = 1 hour, 86400000 = 1 day
+              .form-group
+                label(for="cfg-maxBackups") Max Backups to Keep:
+                input(type="number" id="cfg-maxBackups" min="1")
+          
+          .form-actions
+            button.btn-primary(type="button" onclick="API.saveConfig()") Save Configuration
+            button.btn-secondary(type="button" onclick="API.getConfig()") Reload
+            button.btn-danger(type="button" onclick="API.restartServer()") Restart Server
 
     script.
       function toggleSidebar() {
@@ -105,53 +186,8 @@ html(lang="en")
         }
       });
 
-      fetch("/dashboard/assets/events.json")
-        .then(response => response.json())
-        .then(response => {
-          const dropdown = document.getElementById("lobbytime");
-
-          Object.keys(response).forEach(group => {
-            const optgroup = document.createElement("optgroup");
-            optgroup.label = group;
-
-            response[group].forEach(eventTime => {
-              const option = document.createElement("option");
-              option.value = eventTime.timestamp;
-              option["data-subtext"] = eventTime.date;
-              option.textContent = eventTime.name;
-
-              optgroup.appendChild(option);
-            })
-
-            dropdown.appendChild(optgroup);
-          })
-        })
-
-      document.getElementById("event-form").addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const timestamp = document.getElementById("lobbytime").value;
-
-        try {
-          const response = await fetch('/dashboard/api/event/set', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ timestamp }),
-          });
-
-          const json = await response.json().catch(() => null);
-          if (json && json.lobbyTime) {
-            const el = document.getElementById('event-div');
-            el.textContent = `${el.textContent} — set to ${formatTimestamp(Number(json.lobbyTime))}`;
-          }
-
-          // Refresh server-provided event name
-          API.getEvent();
-        } catch (error) {
-          console.error('Error:', error);
-        }
+      document.addEventListener('DOMContentLoaded', () => {
+        API.getConfig();
       });
     
     script(src="/dashboard/assets/api.js")

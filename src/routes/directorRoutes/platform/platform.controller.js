@@ -1,6 +1,9 @@
 import { Router } from "express";
 
 import fs from "fs";
+import fsp from "fs/promises";
+import fileCache from "../../../lib/fileCache.js";
+import path from "path";
 
 import config from "../../../../config.json" with { type: "json" };
 
@@ -9,19 +12,13 @@ const router = Router();
 async function getDirectionContent(packageId, platform) {
   let returnContent = {};
   try {
-    returnContent = JSON.parse(
-      fs.readFileSync(`directions/${packageId}.json`, "utf8"),
-    );
+    returnContent = await fileCache.getJson(path.resolve(`directions/com.ea.game.simpsons4_row.json`));
 
     returnContent.clientId = `simpsons4-${platform}-client`;
     returnContent.mdmAppKey = `simpsons-4-${platform}`;
 
     returnContent.serverData.forEach((item) => {
-      if (item.key.startsWith("nexus.")) {
-        item.value = `http://${config.ip}:${config.listenPort}/`;
-      } else if (item.key.startsWith("synergy.")) {
-        item.value = `http://${config.ip}:${config.listenPort}`;
-      }
+      item.value = `http://${config.ip}:${config.listenPort}`;
     });
   } catch (error) {
     if (error.code == "ENOENT") {

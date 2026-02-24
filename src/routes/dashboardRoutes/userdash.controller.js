@@ -5,7 +5,9 @@ import fileUpload from "express-fileupload";
 
 import nodemailer from "nodemailer";
 
-import sqlite3 from "sqlite3";
+import db from "../../lib/db.js";
+
+import apiController from "./api/api.controller.js";
 
 import config from "../../../config.json" with { type: "json" };
 
@@ -14,21 +16,15 @@ import { randomBytes } from "crypto";
 import generateToken from "../authRoutes/connect/tokenGen.js";
 
 import fs from "fs";
-
-const db = new sqlite3.Database(
-  config.dataDirectory + "/users.db",
-  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-  (error) => {
-    if (error) {
-      console.error("Error opening database:", error.message);
-    }
-  },
-);
+import { logger } from "../../lib/logger.js";
 
 const router = Router();
 
 router.use(cookieParser());
 router.use(json());
+
+// Mount the API controller for user dashboard API endpoints
+router.use("/api", apiController);
 
 function randomInt(min, max) { // https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -41,7 +37,7 @@ router.get("/", async (req, res, next) => {
     const USER_EXISTS_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
     await db.get(USER_EXISTS_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -87,7 +83,7 @@ router.post("/api/signup", async (req, res, next) => {
     await db.get(LAST_USER_QUERY, async (error, row) => {
       // Get the last created user, so we can make the new users ids +1
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query");
         res.status(500).send("Internal error");
         return;
       }
@@ -108,7 +104,7 @@ router.post("/api/signup", async (req, res, next) => {
           if (error.message.includes('SQLITE_CONSTRAINT: UNIQUE constraint failed: UserData.UserEmail')) {
             res.status(400).send("Email already in use");
           } else {
-            console.error("Error executing query:", error.message);
+            logger.error(error, "Error executing query:");
             res.status(500).send("Internal Error");
           }
 
@@ -140,7 +136,7 @@ router.post("/api/login", async (req, res, next) => {
       "SELECT UserAccessToken, UserCred FROM UserData WHERE UserEmail = ?;";
     await db.get(USER_BY_EMAIL, [email], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send({ message: "Internal error" });
         return;
       }
@@ -189,7 +185,7 @@ router.post("/api/sendCode", async (req, res, next) => {
     const USER_EXISTS_BY_MAIL_QUERY = "SELECT 1 from UserData WHERE UserEmail = ?;";
     await db.get(USER_EXISTS_BY_MAIL_QUERY, [email], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -208,7 +204,7 @@ router.post("/api/sendCode", async (req, res, next) => {
           const UPDATE_CRED_BY_EMAIL = "UPDATE UserData SET UserCred = ? WHERE UserEmail = ?;";
           await db.run(UPDATE_CRED_BY_EMAIL, [data.code, email]);
         } catch (err) {
-          console.error(err.message); 
+          logger.error(err, "Error in sendCode");
         }
       } else if (config.useSMTP) {
         const transporter = nodemailer.createTransport({
@@ -235,7 +231,7 @@ router.post("/api/sendCode", async (req, res, next) => {
 
          transporter.sendMail(mailOptions, function(error, info) {
            if (error) {
-             console.log("Error:", error);
+             logger.error(error, "Error in sendMail");
            }
          });
       }
@@ -256,7 +252,7 @@ router.get("/api/getAccountInfo", async (req, res, next) => {
     const USERINFO_BY_TOKEN_QUERY = "SELECT UserName, UserEmail from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -286,7 +282,7 @@ router.post("/api/changeUsername", async (req, res, next) => {
     const USERINFO_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -319,7 +315,7 @@ router.post("/api/changeEmail", async (req, res, next) => {
     const USERINFO_BY_TOKEN_QUERY = "SELECT 1 from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -346,7 +342,7 @@ router.post("/api/deleteAccount", async (req, res, next) => {
     const USERINFO_BY_TOKEN_QUERY = "SELECT MayhemId from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -378,7 +374,7 @@ router.post("/api/uploadTown", fileUpload(), async (req, res, next) => {
     const USERINFO_BY_TOKEN_QUERY = "SELECT LandSavePath, MayhemId from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -395,7 +391,7 @@ router.post("/api/uploadTown", fileUpload(), async (req, res, next) => {
         const UPDATE_QUERY = `UPDATE UserData SET LandSavePath = ? WHERE MayhemId = ?`;
         db.run(UPDATE_QUERY, [savePath, row.MayhemId], async function (error) {
           if (error) {
-            console.error("Error:", error.message);
+            logger.error(error, "Error:");
             res.status(500).send("Internal error");
             return;
           }
@@ -424,7 +420,7 @@ router.get("/api/exportTown", fileUpload(), async (req, res, next) => {
     const USERINFO_BY_TOKEN_QUERY = "SELECT LandSavePath from UserData WHERE UserAccessToken = ?;";
     await db.get(USERINFO_BY_TOKEN_QUERY, [token], async (error, row) => {
       if (error) {
-        console.error("Error executing query:", error.message);
+        logger.error(error, "Error executing query:");
         res.status(500).send("Internal error");
         return;
       }
@@ -441,7 +437,7 @@ router.get("/api/exportTown", fileUpload(), async (req, res, next) => {
 
       res.download(row.LandSavePath, (err) => {
         if (err) {
-          console.error("Download error:", err);
+          logger.error(err, "Download error");
           // res.status(500).send("Error sending file"); Makes the server crash
         }
       });

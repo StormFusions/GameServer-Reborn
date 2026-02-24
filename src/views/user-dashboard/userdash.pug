@@ -1,56 +1,188 @@
 doctype html
 html(lang="en")
   head
-    title="Userdash"
+    title="User Dashboard"
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet", href="/dashboard/assets/userdash.css")
   body
-    .container(style="display: flex; flex-direction: column; height: 92.5vh; padding: 1rem;")
-      .wrapper
-        .box
-          h3 Account Operations
-          .row
-            input#username-input
-            button(onclick="API.changeUsername()") Change Username
-          .row
-            input#email-input
-            button(onclick="API.changeEmail()") Change Email
+    header.app-header
+      h1 Springfield Management
+      button.mobile-menu-btn(onclick="toggleMobileMenu()")
+        svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="24" height="24" fill="currentColor")
+          path(d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z")
 
-          .row
-            button(onclick="API.logout()") Logout
+    #info-message
 
-            button#delete-button(style="background-color: red;", onclick="API.areYouSure()") Delete Account
+    main.dashboard-container
+      .dashboard-content
+        
+        // Account Section
+        .card
+          .card-header
+            h2 Account Operations
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="24" height="24" fill="currentColor")
+              path(d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z")
+          .card-body
+            .input-group
+              label(for="username-input") Username
+              input#username-input(type="text", placeholder="Enter new username")
+              button.btn.btn-primary(onclick="API.changeUsername()")
+                span Change Username
+            
+            .input-group
+              label(for="email-input") Email
+              input#email-input(type="email", placeholder="Enter new email")
+              button.btn.btn-primary(onclick="API.changeEmail()")
+                span Change Email
+            
+            .button-group
+              button.btn.btn-secondary(onclick="API.logout()")
+                span Logout
+              button.btn.btn-danger(onclick="API.areYouSure()", title="This cannot be undone")
+                span Delete Account
 
-        .box
-          h3 Town Operations
-          .row
-            form#user-town-form(enctype="multipart/form-data")
-              input#town-input(type="file", name="town", accept=".pb, .land", required="true")
-              button(type="submit") Upload
-          .row
-            button(onClick="API.usersDownloadFile()") Export Town
+        // Town Section
+        .card
+          .card-header
+            h2 Town Operations
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="24" height="24" fill="currentColor")
+              path(d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z")
+          .card-body
+            .input-group
+              label(for="town-input") Upload Springfield File
+              .file-input-wrapper
+                input#town-input(type="file", name="town", accept=".pb, .land", required="true", onchange="updateFileName(this)")
+                span.file-name Select file...
+                span.file-hint (.pb or .land files)
+              form#user-town-form(enctype="multipart/form-data", onsubmit="return false;")
+                input#town-input(type="file", name="town", accept=".pb, .land", required="true", style="display: none;")
+                button.btn.btn-primary(onclick="uploadTown()")
+                  span Upload Town
+            
+            .input-group
+              label Download Springfield File
+              button.btn.btn-secondary(onclick="API.usersDownloadFile()")
+                svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="20" height="20" fill="currentColor")
+                  path(d="M19 9h-4V3H9v6H5l7 7 7-7z")
+                span Export Town
 
-        .box
-          h3 Friends
-          p Soon...
+        // Friends Section
+        .card
+          .card-header
+            h2 Friends Management
+            svg(xmlns="http://www.w3.org/2000/svg", viewBox="0 0 24 24" width="24" height="24" fill="currentColor")
+              path(d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.64 2.42 1.71 2.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z")
+          .card-body
+            .search-section
+              label(for="search-username-input") Search for Players
+              .search-group
+                input#search-username-input(type="text", placeholder="Enter player username")
+                button.btn.btn-primary(onclick="API.searchUser()")
+                  span Search
+              #search-result
 
-        .infobox(style="overflow-y: auto; max-height: 50vh; padding: 1rem;")
-          div
-            .column
-              h4 Town Operations Instructions
-              p - Click Browse
-              p - In the new window, locate and select the saved .pb or .land file
-              p - Click Upload
-            .column
-              h4 Don't have your Springfield file?
-              p - Go to https://towns.spanser.dev/
-              p - Search for your In-Game Username (If it isn't present, your Springfield is gone but you can create a new one when you sign up)
-              p - Download your file
-              p - Unzip your file using 7-Zip or WinRAR
-              p - Follow the Town Operations Instructions above and upload the .pb or .land file
-            .column
-              h4 Don't remember your In-Game Username?
-              p - Log into https://www.ea.com/
-              p - Go to your Profile
+            .friends-container
+              .friends-column
+                .friends-header
+                  h3 Pending Sent
+                  span.badge#pending-sent-count 0
+                #pending-sent-list.friends-list
+                  p.empty-message Awaiting acceptance...
 
-  script(src="/dashboard/assets/api.js")
+              .friends-column
+                .friends-header
+                  h3 Pending Received
+                  span.badge#pending-received-count 0
+                #pending-received-list.friends-list
+                  p.empty-message No incoming requests
+
+              .friends-column
+                .friends-header
+                  h3 Your Friends
+                  span.badge#friends-count 0
+                #friends-list.friends-list
+                  p.empty-message Start adding friends!
+
+    style.
+      .friend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        gap: 0.5rem;
+      }
+
+      .friend-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .friend-username {
+        font-weight: 600;
+        color: #f6f6f6;
+      }
+
+      .friend-id {
+        font-size: 0.8rem;
+        color: #999;
+      }
+
+      .friend-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+    footer.app-footer
+      .help-section
+        .help-column
+          h4 How to Upload Your Town
+          ul
+            li Click Browse to select a file
+            li Find your saved .pb or .land file
+            li Click Upload to sync your town
+        
+        .help-column
+          h4 Don't Have Your Springfield?
+          ul
+            li Visit https://towns.spanser.dev/
+            li Search for your in-game username
+            li Download and unzip your file
+            li Upload the .pb or .land file
+        
+        .help-column
+          h4 Need Help?
+          ul
+            li Log into https://www.ea.com/
+            li Go to your Profile section
+            li Find your in-game username there
+
+    script.
+      function toggleMobileMenu() {
+        const menu = document.querySelector('.mobile-menu-btn');
+        menu.classList.toggle('active');
+      }
+
+      function updateFileName(input) {
+        const fileName = input.files && input.files[0] ? input.files[0].name : 'Select file...';
+        const fileNameSpan = input.parentElement.querySelector('.file-name');
+        fileNameSpan.textContent = fileName;
+      }
+
+      function uploadTown() {
+        const fileInput = document.getElementById('town-input');
+        if (fileInput.files.length === 0) {
+          alert('Please select a file');
+          return;
+        }
+        const form = new FormData();
+        form.append('town', fileInput.files[0]);
+        // Call your upload API
+        console.log('Uploading file:', fileInput.files[0].name);
+      }
+
+    script(src="/dashboard/assets/api.js")

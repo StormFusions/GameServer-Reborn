@@ -43,7 +43,7 @@
     },
     {
       "key": "antelope.friends.url",
-      "value": "https://friends.gs.ea.com:443"
+      "value": "http://REDACTED:4242"
     },
     {
       "key": "dmg.url",
@@ -67,7 +67,7 @@
     },
     {
       "key": "mayhem.url",
-      "value": "https://ipsp.sn.eamobile.com"
+      "value": "http://REDACTED:4242"
     },
     {
       "key": "group.recommendations.url",
@@ -99,11 +99,11 @@
     },
     {
       "key": "eadp.friends.host",
-      "value": "https://friends.gs.ea.com"
+      "value": ""
     },
     {
       "key": "synergy.product",
-      "value": "https://product.sn.eamobile.com"
+      "value": ""
     },
     {
       "key": "synergy.drm",
@@ -111,7 +111,7 @@
     },
     {
       "key": "synergy.user",
-      "value": "https://user.sn.eamobile.com"
+      "value": ""
     },
     {
       "key": "antelope.inbox.url",
@@ -127,7 +127,7 @@
     },
     {
       "key": "friends.url",
-      "value": "https://m.friends.dm.origin.com"
+      "value": "http://REDACTED:4242"
     },
     {
       "key": "aruba.url",
@@ -139,11 +139,11 @@
     },
     {
       "key": "nexus.connect",
-      "value": "https://accounts.ea.com/"
+      "value": ""
     },
     {
       "key": "synergy.director",
-      "value": "https://director.sn.eamobile.com"
+      "value": ""
     },
     {
       "key": "pin.aruba.url",

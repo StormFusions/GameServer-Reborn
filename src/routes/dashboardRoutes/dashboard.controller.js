@@ -67,6 +67,57 @@ router.get("/savefiles", async (req, res, next) => {
   }
 });
 
+router.get("/backups", async (req, res, next) => {
+  try {
+    const key = req.cookies.adminKey;
+    if (key && key === config.adminKey) {
+      res.render("admin-dashboard/dashboard-backups");
+    } else {
+      res.render("admin-dashboard/login");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/logs", async (req, res, next) => {
+  try {
+    const key = req.cookies.adminKey;
+    if (key && key === config.adminKey) {
+      res.render("admin-dashboard/dashboard-logs");
+    } else {
+      res.render("admin-dashboard/login");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/config", async (req, res, next) => {
+  try {
+    const key = req.cookies.adminKey;
+    if (key && key === config.adminKey) {
+      res.render("admin-dashboard/dashboard-config");
+    } else {
+      res.render("admin-dashboard/login");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/players", async (req, res, next) => {
+  try {
+    const key = req.cookies.adminKey;
+    if (key && key === config.adminKey) {
+      res.render("admin-dashboard/dashboard-players");
+    } else {
+      res.render("admin-dashboard/login");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post("/login", async (req, res, next) => {
   try {

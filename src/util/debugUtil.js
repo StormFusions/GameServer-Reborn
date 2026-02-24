@@ -1,21 +1,31 @@
 import chalk from 'chalk';
 
 import fs from "fs";
+import fsp from "fs/promises";
+import path from "path";
+import { logger } from "../lib/logger.js";
+
+const LOG_PATH = path.resolve(process.cwd(), "latest.log");
 
 export async function debugWithTime(level, message) {
   const currentTime = new Date().toLocaleTimeString("nb-NO", { hour12: false });
+  const formatted = `[${currentTime}] ${message}`;
 
   switch (level) {
     case 0:
-      console.log(`[${currentTime}] ${message}`);
+      logger.info(formatted);
       break;
     case 1:
-      console.log(chalk.yellow(`[${currentTime}] ${message}`));
+      logger.warn(formatted);
       break;
     case 2:
-      console.log(chalk.red(`[${currentTime}] ${message}`));
+      logger.error(formatted);
       break;
   }
 
-  fs.appendFileSync("latest.log", `[${currentTime}] ${message}\n`);
+  try {
+    await fsp.appendFile(LOG_PATH, `${formatted}\n`);
+  } catch (e) {
+    // best-effort logging; ignore failures
+  }
 }

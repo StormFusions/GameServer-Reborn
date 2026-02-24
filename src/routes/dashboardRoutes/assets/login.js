@@ -20,6 +20,6 @@ document
         document.getElementById("error-message").style.display = "block";
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error(error, "Error");
     }
   });
