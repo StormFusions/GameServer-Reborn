@@ -63,9 +63,9 @@ npm start
 
 ## Using the Dashboard(s)
 
-- On the admin dashboard you can configure server settings and the current event, manage users and manage towns. A server configurator is planned.
+- On the admin dashboard you can configure server settings and the current event, manage users, manage towns and configure the server in the UI.
 
-- On the user dashboard you can make an email account, login and change your username and email, and import and export your town. Adding friends is a planned for the user dashboard.
+- On the user dashboard you can make an email account, login and change your username and email, import and export your town and manage your friends outside of the game.
 
 ### Admin Dashboard
 To access the admin dashboard you'll need the admin key. It will be automaticly generated on server startup if it's not set, and can be found in `config.json`. To use the admin dashboard simply navigate to:
