@@ -43,7 +43,7 @@
     },
     {
       "key": "antelope.friends.url",
-      "value": "http://REDACTED:4242"
+      "value": ""
     },
     {
       "key": "dmg.url",
@@ -67,7 +67,7 @@
     },
     {
       "key": "mayhem.url",
-      "value": "http://REDACTED:4242"
+      "value": ""
     },
     {
       "key": "group.recommendations.url",
@@ -127,7 +127,7 @@
     },
     {
       "key": "friends.url",
-      "value": "http://REDACTED:4242"
+      "value": ""
     },
     {
       "key": "aruba.url",
